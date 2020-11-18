@@ -21,3 +21,4 @@ Add a button and choose the action you want to use.
 
 ### Tested Devices
 * KeyLight (Firmware: 1.0.3/200)
+* KeyLight Air (Firmware: 1.0.3/195, 1.0.3/200)
