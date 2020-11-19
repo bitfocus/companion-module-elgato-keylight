@@ -82,7 +82,7 @@ instance.prototype.actions = function(system) {
 				label: 'Color Temperature',
 				id: 'temp',
 				min: 143,
-				max: 334,
+				max: 344,
 				default: 143,
 				required: true,
 				range: true
