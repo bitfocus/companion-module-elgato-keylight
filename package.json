@@ -1,19 +1,20 @@
 {
-  "name": "elgato-keylight",
-  "version": "1.0.1",
-  "description": "",
-  "manufacturer": "Elgato",
-  "product": "Keylight",
+	"name": "elgato-keylight",
+	"version": "1.0.1",
+	"description": "",
+	"manufacturer": "Elgato",
+	"product": [
+		"Key Light",
+		"Ring Light"
+	],
 	"shortname": "keylight",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [
-    "elgato",
-    "keylight",
-    "ringlight"
-  ],
-  "author": "David Stevens <issues@jtf4.com>",
-  "license": "MIT"
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"keywords": [
+		"lighting"
+	],
+	"author": "David Stevens <issues@jtf4.com>",
+	"license": "MIT"
 }
