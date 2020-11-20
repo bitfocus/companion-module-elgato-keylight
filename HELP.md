@@ -7,7 +7,7 @@ This module will allow you to control the Elgato Key Light and Ring Light family
 * This module controls the Key Light through REST on port 9123.
 
 #### Static Network Configuration (optional)
-* For better performance and reliabplity, it is recommended that you assign the Key Light IP address. One way to accomplish this is to make a DHCP reservation on your home router or DHCP server.
+* For better performance and reliability, it is recommended that you assign the Key Light IP address. One way to accomplish this is to make a DHCP reservation on your home router or DHCP server.
 
 ### To use the module
 Add a button and choose the action you want to use.
