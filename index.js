@@ -1,8 +1,5 @@
-
-const { options } = require('marked');
 var instance_skel = require('../../instance_skel');
 var debug;
-var log;
 
 function instance(system, id, config) {
 	var self = this;
