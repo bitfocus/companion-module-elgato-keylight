@@ -22,6 +22,7 @@ instance.prototype.updateConfig = function(config) {
 
 instance.prototype.init = function() {
 	var self = this;
+	debug = self.debug;
 
 	self.status(self.STATE_OK);
 }
