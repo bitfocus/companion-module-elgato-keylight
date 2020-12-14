@@ -1,5 +1,25 @@
 var instance_skel = require('../../instance_skel');
+const { temperatures } = require('./temperatures');
 var debug;
+
+const TEMP_MIN_ID = 143;
+const TEMP_MAX_ID = 344;
+
+const TEMP_MIN = 2900;
+const TEMP_MAX = 7000;
+
+const createTemperatureLookupTable = () => {
+	const lookupTable = {};
+
+	temperatures.forEach((value, index, list) => {
+		if ((index === 0) || (value !== list[index - 1])) {
+			lookupTable[`${value}K`] = index + TEMP_MIN_ID;
+		}
+	});
+	return lookupTable;
+}
+
+const convertToK = (value) => temperatures[value - TEMP_MIN_ID];
 
 function instance(system, id, config) {
 	var self = this;
