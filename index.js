@@ -8,8 +8,15 @@ const TEMP_MAX_ID = 344;
 const TEMP_MIN = 2900;
 const TEMP_MAX = 7000;
 
+const BRIGHTNESS_MIN = 3;
+const BRIGHTNESS_MAX = 100;
+
 const INTERVAL_MIN = 250;
 const INTERVAL_DEFAULT = 500;
+
+const POWER_ON = 'ON';
+const POWER_OFF = 'OFF';
+const POWER_VALUES = [POWER_OFF, POWER_ON];
 
 const createTemperatureLookupTable = () => {
 	const lookupTable = {};
@@ -38,6 +45,15 @@ function instance(system, id, config) {
 		},
 		interval: null,
 	}
+
+	self.data.temperatureLookupTable = createTemperatureLookupTable();
+	self.data.choicesTemperature = Object.keys(self.data.temperatureLookupTable).map(k => (
+		{
+			id: self.data.temperatureLookupTable[k],
+			label: k,
+		}
+	));
+	self.data.choicesPower = POWER_VALUES.map((label, index) => ({ id: index, label }));
 
 	self.actions(); // export actions
 
@@ -208,6 +224,9 @@ instance.prototype.actions = function(system) {
 				}
 			]
 		},
+		'powercycle': {
+			label: 'Power Cycle',
+		},
 		'colortemp': {
 			label: 'Color Temperature',
 			options: [
@@ -215,14 +234,40 @@ instance.prototype.actions = function(system) {
 				type: 'number',
 				label: 'Color Temperature',
 				id: 'temp',
-				min: 143,
-				max: 344,
-				default: 143,
+				min: TEMP_MIN_ID,
+				max: TEMP_MAX_ID,
+				default: TEMP_MIN_ID,
 				required: true,
 				range: true
 				}
 			]
 		},
+		'colortempk': {
+			label: 'Color Temperature in Kelvin',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Color Temperature',
+					id: 'tempK',
+					choices: self.data.choicesTemperature,
+					default: TEMP_MIN_ID,
+				}
+			]
+        },
+        'colortempchange': {
+            label: 'Increase/Decrease Color Temperature (-200 to +200)',
+            options: [
+                {
+                        type: 'number',
+                        label: 'Color Temperature Delta',
+                        id: 'delta',
+                        min: -200,
+                        max: 200,
+                        default: 100,
+                        required: true,
+                }
+            ]
+        },
 		'brightness': {
 			label: 'Brightness',
 			options: [
@@ -230,14 +275,28 @@ instance.prototype.actions = function(system) {
 				type: 'number',
 				label: 'Brightness',
 				id: 'brightness',
-				min: 0,
-				max: 100,
+				min: BRIGHTNESS_MIN,
+				max: BRIGHTNESS_MAX,
 				default: 50,
 				required: true,
 				range: true
 				}
 			]
+		},
+        'brightnesschange': {
+            label: 'Increase/Decrease Brightness (-25 to +25)',
+            options: [
+                {
+                        type: 'number',
+                        label: 'Brightness Delta',
+                        id: 'delta',
+                        min: -25,
+                        max: 25,
+                        default: 10,
+                        required: true,
 		}
+            ]
+        },
 	});
 }
 
@@ -255,10 +314,37 @@ instance.prototype.action = function(action) {
 			case 'power':
 				lightObj.on = (action.options.bool === 'on' ? 1 : 0);
 				break;
+            case 'powercycle':
+                lightObj.on = 1 - self.data.status.power;
+                break;
 			case 'colortemp':
-				let colorTemperature = action.options.temp;
+			case 'colortempk':
+				let colorTemperature = action.options.temp ? action.options.temp : action.options.tempK;
 				let colorTemperatureString = colorTemperature.toString();
 				lightObj.temperature = parseInt(colorTemperatureString);
+				break;
+            case 'colortempchange':
+                let newTemp = self.data.variables.temperature.getColorTemp(self.data.status.temperature) + action.options.delta;
+                if (newTemp > TEMP_MAX) {
+                    self.log('info', 'Attempted to increase temperature beyond max value. Type: ' + action.action);
+                    return;
+                }
+                if (newTemp < TEMP_MIN) {
+                    self.log('info', 'Attempted to decrease temperature below max value. Type: ' + action.action);
+                    return;
+                }
+                lightObj.temperature = self.data.temperatureLookupTable[`${newTemp}K`];
+				break;
+			case 'brightnesschange':
+				lightObj.brightness = self.data.status.brightness + action.options.delta;
+                if (lightObj.brightness  > BRIGHTNESS_MAX) {
+                    self.log('info', 'Attempted to increase brightness beyond max value. Type: ' + action.action);
+                    return;
+                }
+                if (lightObj.brightness  < BRIGHTNESS_MIN) {
+                    self.log('info', 'Attempted to decrease brightness below max value. Type: ' + action.action);
+                    return;
+                }
 				break;
 			case 'brightness':
 				let brightness = action.options.brightness;
@@ -269,11 +355,9 @@ instance.prototype.action = function(action) {
 		lights[0] = lightObj;
 
 		if (Object.keys(lightObj).length > 0) {
-			console.log(lights);
 			let command = {};
 			command.lights = lights;
 			let strCommand = JSON.stringify(command);
-			console.log(strCommand);
 
 			self.system.emit('rest_put', cmd, strCommand, function (err, result) {
 				if (err !== null) {
