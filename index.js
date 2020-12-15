@@ -65,6 +65,7 @@ instance.prototype.updateConfig = function(config) {
 
 	self.config = config;
 
+	self.initFeedback();
 	self.updateVariableDefinitions();
 	self.initPolling();
 	self.status(self.STATE_OK);
@@ -74,6 +75,7 @@ instance.prototype.init = function() {
 	var self = this;
 	debug = self.debug;
 
+	self.initFeedback();
 	self.updateVariableDefinitions();
 	self.initPolling();
 	self.status(self.STATE_OK);
@@ -159,7 +161,7 @@ instance.prototype.initPolling = function() {
 
 	if (self.data.interval) {
 		clearInterval(self.data.interval);
-		}
+	}
 
 	if (self.config.ip && self.config.polling) {
 		const url = `http://${self.config.ip}:9123/elgato/lights`;
@@ -170,7 +172,7 @@ instance.prototype.initPolling = function() {
 					self.log('error', 'HTTP GET Request failed (' + result.error.code + ')');
 					self.status(self.STATUS_ERROR, result.error.code);
 					return;
-}
+				}
 				self.updateLightStatus(result.data.lights[0]);
 				self.status(self.STATUS_OK);
 			});
@@ -193,6 +195,7 @@ instance.prototype.updateLightStatus = function(status) {
 			} else {
 				this.setVariable(name, value);
             }
+			self.checkFeedbacks(name);
 		}
 	});
 }
@@ -294,7 +297,7 @@ instance.prototype.actions = function(system) {
                         max: 25,
                         default: 10,
                         required: true,
-		}
+                }
             ]
         },
 	});
@@ -317,12 +320,12 @@ instance.prototype.action = function(action) {
             case 'powercycle':
                 lightObj.on = 1 - self.data.status.power;
                 break;
-			case 'colortemp':
+            case 'colortemp':
 			case 'colortempk':
 				let colorTemperature = action.options.temp ? action.options.temp : action.options.tempK;
 				let colorTemperatureString = colorTemperature.toString();
 				lightObj.temperature = parseInt(colorTemperatureString);
-				break;
+                break;
             case 'colortempchange':
                 let newTemp = self.data.variables.temperature.getColorTemp(self.data.status.temperature) + action.options.delta;
                 if (newTemp > TEMP_MAX) {
@@ -346,7 +349,7 @@ instance.prototype.action = function(action) {
                     return;
                 }
 				break;
-			case 'brightness':
+            case 'brightness':
 				let brightness = action.options.brightness;
 				lightObj.brightness = parseInt(brightness);
 				break;
@@ -371,6 +374,96 @@ instance.prototype.action = function(action) {
 			});
 		}
 	}	
+}
+
+// defines available feedbacks
+instance.prototype.initFeedback = function() {
+	const self = this;
+	const feedbacks = {};
+
+	const foregroundColor = {
+		type: 'colorpicker',
+		label: 'Foreground color',
+		id: 'fg',
+		default: this.rgb(255, 255, 255),
+	};
+
+	const backgroundColor = {
+		type: 'colorpicker',
+		label: 'Background color',
+		id: 'bg',
+		default: this.rgb(255, 0, 0),
+	};
+	
+	const selectPower = {
+		type: 'dropdown',
+		label: 'Power Status',
+		id: 'power',
+		default: 1,
+		choices: self.data.choicesPower,
+    };
+    
+    const selectBrightness = {
+        type: 'number',
+        label: 'Brightness',
+        id: 'brightness',
+        min: BRIGHTNESS_MIN,
+        max: BRIGHTNESS_MAX,
+        default: 50,
+    }
+
+	const selectTemperature = {
+		type: 'dropdown',
+		label: 'Temperature in Kelvin',
+		id: 'temperature',
+		default: TEMP_MIN_ID,
+		choices: self.data.choicesTemperature,
+	};
+
+	feedbacks.power = {
+		label: 'Power Status',
+		description: 'When light power status changes, change colors of the bank',
+		options: [selectPower, foregroundColor, backgroundColor],
+	};
+
+    feedbacks.brightness = {
+        label: 'Brightness',
+		description: 'When light brightness changes, change colors of the bank',
+		options: [selectBrightness, foregroundColor, backgroundColor],
+    }
+
+    feedbacks.temperature = {
+		label: 'Color temperature',
+		description: 'When light color temperature changes, change colors of the bank',
+		options: [selectTemperature, foregroundColor, backgroundColor],
+    };
+    
+	self.setFeedbackDefinitions(feedbacks);
+}
+
+// executes whenever feedback is checked 
+instance.prototype.feedback = function(feedback, bank) {
+    const self = this;
+    let variable;
+    let currentValue;
+    let feedbackValue;
+
+	switch (feedback.type) {
+		case 'temperature':
+        case 'brightness':
+            variable = self.data.variables[feedback.type];
+			break;
+		case 'power':
+            variable = self.data.variables.on;
+			break;
+	}
+
+    currentValue = typeof variable.getValue === 'function' ? variable.getValue(self.data.status[feedback.type]) : self.data.status[feedback.type];
+    feedbackValue = typeof variable.getValue === 'function' ? variable.getValue(feedback.options[feedback.type]) : feedback.options[feedback.type];
+
+    if (currentValue === feedbackValue) {
+        return { color: feedback.options.fg, bgcolor: feedback.options.bg }
+    }
 }
 
 instance_skel.extendedBy(instance);
