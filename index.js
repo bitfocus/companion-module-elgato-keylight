@@ -234,24 +234,9 @@ instance.prototype.actions = function(system) {
 			label: 'Color Temperature',
 			options: [
 				{
-				type: 'number',
-				label: 'Color Temperature',
-				id: 'temp',
-				min: TEMP_MIN_ID,
-				max: TEMP_MAX_ID,
-				default: TEMP_MIN_ID,
-				required: true,
-				range: true
-				}
-			]
-		},
-		'colortempk': {
-			label: 'Color Temperature in Kelvin',
-			options: [
-				{
 					type: 'dropdown',
 					label: 'Color Temperature',
-					id: 'tempK',
+					id: 'temp',
 					choices: self.data.choicesTemperature,
 					default: TEMP_MIN_ID,
 				}
@@ -321,10 +306,7 @@ instance.prototype.action = function(action) {
                 lightObj.on = 1 - self.data.status.power;
                 break;
             case 'colortemp':
-			case 'colortempk':
-				let colorTemperature = action.options.temp ? action.options.temp : action.options.tempK;
-				let colorTemperatureString = colorTemperature.toString();
-				lightObj.temperature = parseInt(colorTemperatureString);
+				lightObj.temperature = parseInt(action.options.temp);
                 break;
             case 'colortempchange':
                 let newTemp = self.data.variables.temperature.getColorTemp(self.data.status.temperature) + action.options.delta;
