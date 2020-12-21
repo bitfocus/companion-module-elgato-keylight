@@ -47,10 +47,10 @@ function instance(system, id, config) {
 	}
 
 	self.data.temperatureLookupTable = createTemperatureLookupTable();
-	self.data.choicesTemperature = Object.keys(self.data.temperatureLookupTable).map(k => (
+	self.data.choicesTemperature = temperatures.map((value, index) => (
 		{
-			id: self.data.temperatureLookupTable[k],
-			label: k,
+			id: index + TEMP_MIN_ID,
+			label: `${value}K`,
 		}
 	));
 	self.data.choicesPower = POWER_VALUES.map((label, index) => ({ id: index, label }));
