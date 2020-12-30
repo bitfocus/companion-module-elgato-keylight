@@ -1,4 +1,4 @@
-const { kelvin2mired } = require('./utils');
+const { getMired } = require('./utils');
 
 module.exports = {
     initConstants() {
@@ -22,7 +22,7 @@ module.exports = {
             .reverse());
 
         this.defineConst('TEMP_CHOICES', this.KELVIN_LIST.map(kelvin => ({
-            id: Math.round(kelvin2mired(kelvin)),
+            id: getMired(kelvin),
             label: `${kelvin}K`,
         })));
     }
