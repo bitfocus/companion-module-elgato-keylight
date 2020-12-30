@@ -65,22 +65,9 @@ module.exports = {
 	},
 	
 	feedback(feedback) {
-		let variable;
-		let currentValue;
-		let feedbackValue;
-	
-		switch (feedback.type) {
-			case 'temperature':
-			case 'brightness':
-				variable = this.data.variables[feedback.type];
-				break;
-			case 'power':
-				variable = this.data.variables.on;
-				break;
-		}
-	
-		currentValue = isFunction(variable.getValue) ? variable.getValue(this.data.status[feedback.type]) : this.data.status[feedback.type];
-		feedbackValue = isFunction(variable.getValue) ? variable.getValue(feedback.options[feedback.type]) : feedback.options[feedback.type];
+		const variable = feedback.type === 'power' ? this.data.variables.on : this.data.variables[feedback.type];
+		const currentValue = isFunction(variable.getValue) ? variable.getValue(this.data.status[feedback.type]) : this.data.status[feedback.type];
+		const feedbackValue = isFunction(variable.getValue) ? variable.getValue(feedback.options[feedback.type]) : feedback.options[feedback.type];
 	
 		if (currentValue === feedbackValue) {
 			return { color: feedback.options.fg, bgcolor: feedback.options.bg }

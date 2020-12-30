@@ -8,7 +8,7 @@ module.exports = {
 				id: 'info',
 				width: 12,
 				label: 'Information',
-				value: 'This module allows you to control the Elgato Keylight and Ringlight family with Companion.'
+				value: 'This module allows you to control the Elgato Keylight and Ringlight family with Companion.',
 			},
 			{
 				type: 'textinput',
@@ -17,7 +17,7 @@ module.exports = {
 				width: 12,
 				regex: this.REGEX_IP,
 				default: '192.168.1.1',
-				required: true
+				required: true,
 			},
 			{
 				type: 'checkbox',

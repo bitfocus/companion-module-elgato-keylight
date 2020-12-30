@@ -82,7 +82,6 @@ module.exports = {
 	},
 	
 	action(action) {
-		console.log(action);
 		if (this.config.ip) {
 			let lightObj = {};
 	
