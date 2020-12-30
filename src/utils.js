@@ -2,17 +2,17 @@ const isFunction = (identifier) => typeof identifier === 'function';
 
 const mround = (value, precision) => Math.round(value / precision) * precision;
 
-const mired2kelvin = (mired) => (1 / mired) * Math.pow(10, 6);
-const kelvin2mired = (kelvin) => Math.pow(10, 6) / kelvin;
+const miredToKelvin = (mired) => 1e6 / mired;
+const kelvinToMired = (kelvin) => 1e6 / kelvin;
 
-const getKelvin = (mired) => mround(mired2kelvin(mired), 50);
-const getMired = (kelvin) => Math.round(kelvin2mired(kelvin));
+const getKelvin = (mired) => mround(miredToKelvin(mired), 50);
+const getMired = (kelvin) => Math.round(kelvinToMired(kelvin));
 
 module.exports = {
     isFunction,
     mround,
-    mired2kelvin,
-    kelvin2mired,
+    miredToKelvin,
+    kelvinToMired,
     getKelvin,
     getMired,
 }
