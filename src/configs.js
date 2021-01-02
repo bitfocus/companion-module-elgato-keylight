@@ -24,7 +24,7 @@ module.exports = {
 				id: 'polling',
 				label: 'Enable Polling?',
 				width: 6,
-				default: true,
+				default: false,
 			},
 			{
 				type: 'number',
