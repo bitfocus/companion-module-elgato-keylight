@@ -18,7 +18,6 @@ class ElgatoKeylightInstance extends instance_skel {
 			...configs,
 			...feedbacks,
 			...polling,
-			...upgrades,
 			...variables,
 		});
 
@@ -37,6 +36,12 @@ class ElgatoKeylightInstance extends instance_skel {
 		this.initActions();
 
 		this.upgrade();
+	}
+
+	static GetUpgradeScripts() {
+		return [
+			upgrades.upgradeV1_2_0
+		]
 	}
 
 	init() {

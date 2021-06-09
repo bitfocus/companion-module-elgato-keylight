@@ -1,7 +1,7 @@
 const { getKelvin, getMired } = require('./utils');
 
 module.exports = {
-    upgradeV1_2_0(config, actions, releaseActions, feedbacks) {
+    upgradeV1_2_0(context, config, actions, feedbacks) {
         let changed = false;
 
         const upgradeActions = (actions, changed) => {
@@ -21,12 +21,7 @@ module.exports = {
         };
 
         changed = upgradeActions(actions);
-        changed = upgradeActions(releaseActions);
 
         return changed;
     },
-
-    upgrade() {
-        this.addUpgradeScript(this.upgradeV1_2_0);
-    }
 }
