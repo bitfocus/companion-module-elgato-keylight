@@ -1,5 +1,3 @@
-const { INTERVAL_DEFAULT, INTERVAL_MIN } = require('./utils');
-
 module.exports = {
 	config_fields() {
 		return [
@@ -35,6 +33,6 @@ module.exports = {
 				default: this.INTERVAL_DEFAULT,
 				required: true,
 			},
-		];
-	}	
+		]
+	},
 }

@@ -1,27 +1,27 @@
-const { getKelvin, getMired } = require('./utils');
+const { getKelvin, getMired } = require('./utils')
 
 module.exports = {
-    upgradeV1_2_0(context, config, actions, feedbacks) {
-        let changed = false;
+	upgradeV1_2_0(context, config, actions) {
+		let changed = false
 
-        const upgradeActions = (actions, changed) => {
-            actions.forEach((action) => {
-                if (action.action === 'colortemp') {
-                    const kelvin = getKelvin(parseInt(action.options.temp));
-                    const mired = getMired(kelvin);
+		const upgradeActions = (actions, changed) => {
+			actions.forEach((action) => {
+				if (action.action === 'colortemp') {
+					const kelvin = getKelvin(parseInt(action.options.temp))
+					const mired = getMired(kelvin)
 
-                    if (action.options.temp !== mired) {
-                        action.options.temp = mired;
-                        changed = true;
-                    }
-                }
-            });
+					if (action.options.temp !== mired) {
+						action.options.temp = mired
+						changed = true
+					}
+				}
+			})
 
-            return changed;
-        };
+			return changed
+		}
 
-        changed = upgradeActions(actions);
+		changed = upgradeActions(actions)
 
-        return changed;
-    },
+		return changed
+	},
 }
