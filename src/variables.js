@@ -10,43 +10,44 @@ module.exports = {
 		}
 
 		this.data.variables.on = {
-			label: 'Light Power Status',
-			name: 'power',
+			name: 'Light Power Status',
+			variableId: 'power',
 			getValue: (value) => this.POWER_VALUES[value],
 		}
 
 		this.data.variables.brightness = {
-			label: 'Light Brightness',
-			name: 'brightness',
+			name: 'Light Brightness',
+			variableId: 'brightness',
 			getValue: (value) => Number(value),
 		}
 
 		this.data.variables.temperature = {
-			label: 'Light Temperature',
-			name: 'temperature',
+			name: 'Light Temperature',
+			variableId: 'temperature',
 			getValue: (value) => `${getKelvin(value)}K`,
 		}
 
 		this.setVariableDefinitions(
 			Object.keys(this.data.variables).map((name) => ({
-				label: this.data.variables[name].label,
 				name: this.data.variables[name].name,
+				variableId: this.data.variables[name].variableId,
 			}))
 		)
 	},
-
 	updateVariables(status) {
-		Object.keys(this.data.variables).forEach((id) => {
+			Object.keys(this.data.variables).forEach((id) => {
+			const variables = {}
 			const value = status[id]
-			const name = this.data.variables[id].name
+			const name = this.data.variables[id].variableId
 
 			if (this.data.status[name] !== value) {
 				this.data.status[name] = value
 				if (isFunction(this.data.variables[id].getValue)) {
-					this.setVariable(name, this.data.variables[id].getValue(value))
+					variables[name] = this.data.variables[id].getValue(value)
 				} else {
-					this.setVariable(name, value)
+					variables[name] = value 
 				}
+				this.setVariableValues(variables)
 				this.checkFeedbacks(name)
 			}
 		})
