@@ -1,21 +1,23 @@
 const { isFunction } = require('./utils')
+const { combineRgb } = require('@companion-module/base')
 
 module.exports = {
 	initFeedbacks() {
+		let self = this
 		const feedbacks = {}
 
 		const foregroundColor = {
 			type: 'colorpicker',
 			label: 'Foreground color',
 			id: 'fg',
-			default: this.rgb(255, 255, 255),
+			default: combineRgb(255, 255, 255),
 		}
 
 		const backgroundColor = {
 			type: 'colorpicker',
 			label: 'Background color',
 			id: 'bg',
-			default: this.rgb(255, 0, 0),
+			default: combineRgb(255, 0, 0),
 		}
 
 		const selectPower = {
@@ -44,37 +46,77 @@ module.exports = {
 		}
 
 		feedbacks.power = {
-			label: 'Power Status',
+			type: 'advanced',
+			name: 'Power Status',
 			description: 'When light power status changes, change colors of the bank',
 			options: [selectPower, foregroundColor, backgroundColor],
+			callback: (feedback) => {
+				const variable =
+					feedback.feedbackId === 'power' ? this.data.variables.on : this.data.variables[feedback.feedbackId]
+				if (variable === undefined) {
+					return
+				}
+				const currentValue = isFunction(variable.getValue)
+					? variable.getValue(this.data.status[feedback.feedbackId])
+					: this.data.status[feedback.feedbackId]
+				const feedbackValue = isFunction(variable.getValue)
+					? variable.getValue(feedback.options[feedback.feedbackId])
+					: feedback.options[feedback.feedbackId]
+
+				if (currentValue === feedbackValue) {
+					return { color: feedback.options.fg, bgcolor: feedback.options.bg }
+				}
+			},
 		}
 
 		feedbacks.brightness = {
-			label: 'Brightness',
+			type: 'advanced',
+			name: 'Brightness',
 			description: 'When light brightness changes, change colors of the bank',
 			options: [selectBrightness, foregroundColor, backgroundColor],
+			callback: (feedback) => {
+				const variable =
+					feedback.feedbackId === 'power' ? this.data.variables.on : this.data.variables[feedback.feedbackId]
+				if (variable === undefined) {
+					return
+				}
+				const currentValue = isFunction(variable.getValue)
+					? variable.getValue(this.data.status[feedback.feedbackId])
+					: this.data.status[feedback.feedbackId]
+				const feedbackValue = isFunction(variable.getValue)
+					? variable.getValue(feedback.options[feedback.feedbackId])
+					: feedback.options[feedback.feedbackId]
+
+				if (currentValue === feedbackValue) {
+					return { color: feedback.options.fg, bgcolor: feedback.options.bg }
+				}
+			},
 		}
 
 		feedbacks.temperature = {
-			label: 'Color temperature',
+			type: 'advanced',
+			name: 'Color temperature',
 			description: 'When light color temperature changes, change colors of the bank',
 			options: [selectTemperature, foregroundColor, backgroundColor],
+			callback: (feedback) => {
+				const variable =
+					feedback.feedbackId === 'power' ? this.data.variables.on : this.data.variables[feedback.feedbackId]
+				if (variable === undefined) {
+					return
+				}
+				const currentValue = isFunction(variable.getValue)
+					? variable.getValue(this.data.status[feedback.feedbackId])
+					: this.data.status[feedback.feedbackId]
+				const feedbackValue = isFunction(variable.getValue)
+					? variable.getValue(feedback.options[feedback.feedbackId])
+					: feedback.options[feedback.feedbackId]
+
+				if (currentValue === feedbackValue) {
+					return { color: feedback.options.fg, bgcolor: feedback.options.bg }
+				}
+			},
 		}
 
-		this.setFeedbackDefinitions(feedbacks)
-	},
-
-	feedback(feedback) {
-		const variable = feedback.type === 'power' ? this.data.variables.on : this.data.variables[feedback.type]
-		const currentValue = isFunction(variable.getValue)
-			? variable.getValue(this.data.status[feedback.type])
-			: this.data.status[feedback.type]
-		const feedbackValue = isFunction(variable.getValue)
-			? variable.getValue(feedback.options[feedback.type])
-			: feedback.options[feedback.type]
-
-		if (currentValue === feedbackValue) {
-			return { color: feedback.options.fg, bgcolor: feedback.options.bg }
-		}
+		self.setFeedbackDefinitions(feedbacks)
 	},
 }

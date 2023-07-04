@@ -1,4 +1,4 @@
-const isFunction = (identifier) => typeof identifier === 'function'
+const isFunction = (identifier) => identifier !== undefined && typeof identifier === 'function'
 
 const mround = (value, precision) => Math.round(value / precision) * precision
 

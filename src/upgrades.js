@@ -1,5 +1,4 @@
 const { getKelvin, getMired } = require('./utils')
-
 module.exports = {
 	upgradeV1_2_0(context, config, actions) {
 		let changed = false

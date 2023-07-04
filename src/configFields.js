@@ -1,8 +1,10 @@
+const { Regex } = require('@companion-module/base')
+
 module.exports = {
-	config_fields() {
+	getConfigFields() {
 		return [
 			{
-				type: 'text',
+				type: 'static-text',
 				id: 'info',
 				width: 12,
 				label: 'Information',
@@ -13,7 +15,7 @@ module.exports = {
 				id: 'ip',
 				label: 'IP',
 				width: 12,
-				regex: this.REGEX_IP,
+				regex: Regex.IP,
 				default: '192.168.1.1',
 				required: true,
 			},
