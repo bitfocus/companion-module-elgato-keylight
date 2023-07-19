@@ -5,7 +5,8 @@
 	"scripts": {
 		"package:dev": "companion-module-build --dev",
 		"package": "companion-module-build",
-		"lint": "eslint ,/src --ext .ts"
+		"lint": "eslint ,/src --ext .ts",
+		"format": "prettier -w ."
 	},
 	"license": "MIT",
 	"dependencies": {
