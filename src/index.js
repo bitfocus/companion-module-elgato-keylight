@@ -7,8 +7,6 @@ const configFields = require('./configFields')
 const upgradeScripts = require('./upgrades')
 const { getMired } = require('./utils')
 
-
-
 class ElgatoKeylightInstance extends InstanceBase {
 	constructor(internal) {
 		super(internal)

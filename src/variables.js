@@ -35,7 +35,7 @@ module.exports = {
 		)
 	},
 	updateVariables(status) {
-			Object.keys(this.data.variables).forEach((id) => {
+		Object.keys(this.data.variables).forEach((id) => {
 			const variables = {}
 			const value = status[id]
 			const name = this.data.variables[id].variableId
@@ -45,7 +45,7 @@ module.exports = {
 				if (isFunction(this.data.variables[id].getValue)) {
 					variables[name] = this.data.variables[id].getValue(value)
 				} else {
-					variables[name] = value 
+					variables[name] = value
 				}
 				this.setVariableValues(variables)
 				this.checkFeedbacks(name)

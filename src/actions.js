@@ -165,7 +165,7 @@ module.exports = {
 						request: 10000,
 					},
 				}
-			
+
 				try {
 					const data = await got.put(this.getUrl(), options).json()
 					self.updateStatus(InstanceStatus.Ok)

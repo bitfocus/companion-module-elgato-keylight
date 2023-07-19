@@ -25,11 +25,6 @@
 		"entrypoint": "..\\src\\index.js"
 	},
 	"manufacturer": "Elgato",
-	"products": [
-		"Key Light",
-		"Ring Light"
-	],
-	"keywords": [
-		"Lighting"
-	]
+	"products": ["Key Light", "Ring Light"],
+	"keywords": ["Lighting"]
 }

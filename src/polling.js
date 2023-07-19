@@ -1,4 +1,4 @@
-const { InstanceStatus } = require("@companion-module/base")
+const { InstanceStatus } = require('@companion-module/base')
 const { setIntervalAsync, clearIntervalAsync } = require('set-interval-async')
 const { got } = require('got-cjs')
 module.exports = {
