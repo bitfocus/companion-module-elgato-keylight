@@ -1,6 +1,6 @@
 {
 	"name": "elgato-keylight",
-	"version": "2.0.1",
+	"version": "2.1.0",
 	"main": "src/index.js",
 	"scripts": {
 		"package:dev": "companion-module-build --dev",
