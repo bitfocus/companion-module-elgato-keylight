@@ -8,6 +8,10 @@ const kelvinToMired = (kelvin) => 1e6 / kelvin
 const getKelvin = (mired) => mround(miredToKelvin(mired), 50)
 const getMired = (kelvin) => Math.round(kelvinToMired(kelvin))
 
+const getContentOfPath = (content, path, separator = ".") => {
+    return path.split(separator).reduce((obj, key) => (obj && obj[key] !== 'undefined' ? obj[key] : null), content)
+}
+
 module.exports = {
 	isFunction,
 	mround,
@@ -15,4 +19,5 @@ module.exports = {
 	kelvinToMired,
 	getKelvin,
 	getMired,
+    getContentOfPath,
 }
