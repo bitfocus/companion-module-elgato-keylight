@@ -10,6 +10,7 @@ module.exports = {
 
 		actions.power = {
 			name: 'Power',
+            description: 'Turn the light on or off (toggle option included)',
 			options: [
 				{
 					type: 'dropdown',
@@ -30,6 +31,7 @@ module.exports = {
 
 		actions.colortemp = {
 			name: 'Color Temperature',
+            description: 'Change the color temperature of the light',
 			options: [
                 {
                     type: 'dropdown',
@@ -68,6 +70,7 @@ module.exports = {
 		}
 		actions.brightness = {
 			name: 'Brightness',
+            description: 'Change the brightness of the light',
 			options: [
                 {
                     type: 'dropdown',
