@@ -2,7 +2,6 @@ const { InstanceStatus } = require('@companion-module/base')
 const { setIntervalAsync, clearIntervalAsync } = require('set-interval-async')
 const { got } = require('got-cjs')
 
-let lastStatus = undefined;
 module.exports = {
 	getUrl() {
 		return `http://${this.config.ip}:9123/elgato/lights`
@@ -14,6 +13,7 @@ module.exports = {
 		}
 
 		if (this.config.ip && this.config.polling) {
+            let lastStatus = undefined;
 			this.data.interval = setIntervalAsync(async () => {
                 await got.get(this.getUrl(), { retry: { limit: 10 } }).then((res) => {
                     const data = JSON.parse(res.body)

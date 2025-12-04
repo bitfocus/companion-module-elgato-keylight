@@ -17,7 +17,7 @@ module.exports = {
 					label: 'Set Power to:',
 					id: 'bool',
 					choices: [
-					{ id: 'off', label: 'off' },
+                        { id: 'off', label: 'off' },
                         { id: 'on', label: 'on' },
                         { id: 'toggle', label: 'toggle' },
 					],
