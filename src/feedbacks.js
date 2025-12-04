@@ -6,20 +6,6 @@ module.exports = {
 		let self = this
 		const feedbacks = {}
 
-		const foregroundColor = {
-			type: 'colorpicker',
-			label: 'Foreground color',
-			id: 'fg',
-			default: combineRgb(255, 255, 255),
-		}
-
-		const backgroundColor = {
-			type: 'colorpicker',
-			label: 'Background color',
-			id: 'bg',
-			default: combineRgb(255, 0, 0),
-		}
-
 		const selectPower = {
 			type: 'dropdown',
 			label: 'Power Status',
@@ -46,10 +32,10 @@ module.exports = {
 		}
 
 		feedbacks.power = {
-			type: 'advanced',
+			type: 'boolean',
 			name: 'Power Status',
-			description: 'When light power status changes, change colors of the bank',
-			options: [selectPower, foregroundColor, backgroundColor],
+			description: 'When light power status changes',
+			options: [selectPower],
 			callback: (feedback) => {
 				const variable =
 					feedback.feedbackId === 'power' ? this.data.variables.on : this.data.variables[feedback.feedbackId]
@@ -63,17 +49,15 @@ module.exports = {
 					? variable.getValue(feedback.options[feedback.feedbackId])
 					: feedback.options[feedback.feedbackId]
 
-				if (currentValue === feedbackValue) {
-					return { color: feedback.options.fg, bgcolor: feedback.options.bg }
-				}
+				return currentValue === feedbackValue;
 			},
 		}
 
 		feedbacks.brightness = {
-			type: 'advanced',
+			type: 'boolean',
 			name: 'Brightness',
-			description: 'When light brightness changes, change colors of the bank',
-			options: [selectBrightness, foregroundColor, backgroundColor],
+			description: 'When light brightness changes',
+			options: [selectBrightness],
 			callback: (feedback) => {
 				const variable =
 					feedback.feedbackId === 'power' ? this.data.variables.on : this.data.variables[feedback.feedbackId]
@@ -87,17 +71,15 @@ module.exports = {
 					? variable.getValue(feedback.options[feedback.feedbackId])
 					: feedback.options[feedback.feedbackId]
 
-				if (currentValue === feedbackValue) {
-					return { color: feedback.options.fg, bgcolor: feedback.options.bg }
-				}
+				return currentValue === feedbackValue;
 			},
 		}
 
 		feedbacks.temperature = {
-			type: 'advanced',
+			type: 'boolean',
 			name: 'Color temperature',
-			description: 'When light color temperature changes, change colors of the bank',
-			options: [selectTemperature, foregroundColor, backgroundColor],
+			description: 'When light color temperature changes',
+			options: [selectTemperature],
 			callback: (feedback) => {
 				const variable =
 					feedback.feedbackId === 'power' ? this.data.variables.on : this.data.variables[feedback.feedbackId]
@@ -111,9 +93,7 @@ module.exports = {
 					? variable.getValue(feedback.options[feedback.feedbackId])
 					: feedback.options[feedback.feedbackId]
 
-				if (currentValue === feedbackValue) {
-					return { color: feedback.options.fg, bgcolor: feedback.options.bg }
-				}
+				return currentValue === feedbackValue;
 			},
 		}
 
