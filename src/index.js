@@ -78,7 +78,7 @@ class ElgatoKeylightInstance extends InstanceBase {
 		this.initActions()
 		this.initFeedbacks()
 
-		this.initPolling()
+		await this.initPolling()
 		this.updateStatus(InstanceStatus.Ok)
 	}
 }
