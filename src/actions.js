@@ -120,7 +120,8 @@ module.exports = {
 			switch (action.actionId) {
 				case 'power': {
                     if (action.options.bool === 'toggle') {
-                        lightObj.on = 1 - this.data.status.power
+                        const currentPower = (typeof this.data?.status?.power === 'number' ? this.data.status.power : 0);
+                        lightObj.on = 1 - currentPower
                         break
                     }
 					lightObj.on = action.options.bool === 'on' ? 1 : 0
