@@ -70,7 +70,6 @@ module.exports = {
         }
 
         // ============================== Settings ============================== //
-
         this.data.variables.powerOnBehavior = {
             name: 'Reset to default parameters on power on ?',
             variableId: 'setting.powerOnBehavior',
@@ -106,6 +105,43 @@ module.exports = {
             getValue: (value) => value / 1000,
         }
 
+        // ============================== Battery ============================== //
+        this.data.variables.powerSource = {
+            name: 'Power adapter connected ?',
+            variableId: 'battery.powerSource',
+            getValue: (value) => value === 1,
+        }
+
+        this.data.variables.level = {
+            name: 'Percentage of charge remaining (%)',
+            variableId: 'battery.level',
+            getValue: (value) => Math.min(Math.max((value >= 10 ? parseInt(value) : value), 0), 100),
+        }
+
+        this.data.variables.status = {
+            name: 'Studio mode are enabled ?',
+            variableId: 'battery.studioMode',
+            getValue: (value) => value !== 2,
+        }
+
+        this.data.variables.currentBatteryVoltage = {
+            name: 'Voltage of the battery (V)',
+            variableId: 'battery.batteryVoltage',
+            getValue: (value) => value / 1000,
+        }
+
+        this.data.variables.inputChargeVoltage = {
+            name: 'Voltage of the power adapter (V)',
+            variableId: 'battery.adapterVoltage',
+            getValue: (value) => value / 1000,
+        }
+
+        this.data.variables.inputChargeCurrent = {
+            name: 'Current power adapter charge (A)',
+            variableId: 'battery.adapterCharge',
+            getValue: (value) => value / 1000,
+        }
+
 		this.setVariableDefinitions(
 			Object.values(this.data.variables).map((variable) => ({
 				name: variable.name,
@@ -115,18 +151,19 @@ module.exports = {
 	},
 	updateVariables(status) {
 		Object.keys(this.data.variables).forEach((id) => {
-			const value = getContentOfPath(status, id);
+			let value = getContentOfPath(status, id);
             if (value === undefined) return;
             const variables = {};
 			const name = this.data.variables[id].variableId
 
+            if (value === null) {
+                value = "$NA"
+            } else if (isFunction(this.data.variables[id].getValue)) {
+                value = this.data.variables[id].getValue(value)
+            }
 			if (this.data.status[name] !== value) {
 				this.data.status[name] = value
-				if (isFunction(this.data.variables[id].getValue)) {
-					variables[name] = this.data.variables[id].getValue(value)
-				} else {
-					variables[name] = value
-				}
+                variables[name] = value
                 this.setVariableValues(variables)
 				this.checkFeedbacks(name)
 			}
