@@ -1,4 +1,6 @@
 node_modules/
+package-lock.json
 /pkg
-/pkg.tgz
-DEBUG-PACKAGED
+/*.tgz
+DEBUG-*
+/.yarn

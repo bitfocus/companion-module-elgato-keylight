@@ -31,7 +31,7 @@ module.exports = {
 			Object.keys(this.data.variables).map((name) => ({
 				name: this.data.variables[name].name,
 				variableId: this.data.variables[name].variableId,
-			}))
+			})),
 		)
 	},
 	updateVariables(status) {
