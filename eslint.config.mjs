@@ -1,13 +1,13 @@
 import { generateEslintConfig } from '@companion-module/tools/eslint/config.mjs'
 
 const baseConfig = await generateEslintConfig({
-	enableTypescript: false,
+	enableTypescript: true,
 })
 
 const customConfig = [
 	...baseConfig,
 	{
-		files: ['src/**/*.js', 'src/**/*.mjs'],
+		files: ['src/**/*.ts', 'src/**/*.tsx'],
 	},
 	{
 		rules: {

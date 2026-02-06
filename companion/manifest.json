@@ -9,10 +9,6 @@
 	"bugs": "https://github.com/bitfocus/companion-module-elgato-keylight/issues",
 	"maintainers": [
 		{
-			"name": "David Stevens",
-			"email": "issues@jtf4.com"
-		},
-		{
 			"name": "Justin James",
 			"email": "digitaldrummerj@gmail.com"
 		}
@@ -22,7 +18,7 @@
 		"type": "node22",
 		"api": "nodejs-ipc",
 		"apiVersion": "0.0.0",
-		"entrypoint": "..\\src\\index.js"
+		"entrypoint": "../dist/main.js"
 	},
 	"manufacturer": "Elgato",
 	"products": ["Key Light", "Ring Light"],
