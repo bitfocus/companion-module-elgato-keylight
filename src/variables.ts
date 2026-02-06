@@ -1,5 +1,6 @@
+import { KeyLightOptions } from './api/types/KeyLight.js'
 import { ModuleInstance } from './main.js'
-import { getKelvin, isFunction, LightStatus } from './utils.js'
+import { getKelvin, isFunction } from './utils.js'
 
 export function UpdateVariableDefinitions(self: ModuleInstance): void {
 	self.data.variables = {}
@@ -35,14 +36,14 @@ export function UpdateVariableDefinitions(self: ModuleInstance): void {
 	)
 }
 
-export function UpdateVariables(self: ModuleInstance, status: LightStatus): void {
+export function UpdateVariables(self: ModuleInstance, lights: KeyLightOptions): void {
 	for (const id of Object.keys(self.data.variables)) {
 		const variable = self.data.variables[id]
 		if (!variable) {
 			continue
 		}
 
-		const value = status[id as keyof LightStatus]
+		const value = lights.lights[0][id as keyof KeyLightOptions['lights'][0]]
 		if (value === undefined || value === null) {
 			continue
 		}

@@ -1,8 +1,7 @@
 import { InstanceStatus } from '@companion-module/base'
 import { clearIntervalAsync, setIntervalAsync } from 'set-interval-async'
-import { got } from 'got'
 import { ModuleInstance } from './main.js'
-import { LightStatus } from './utils.js'
+import { KeyLightOptions } from './api/types/KeyLight.js'
 
 export function GetUrl(self: ModuleInstance): string {
 	return `http://${self.config.ip}:9123/elgato/lights`
@@ -18,10 +17,8 @@ export async function InitPolling(self: ModuleInstance): Promise<void> {
 	if (self.config.ip && self.config.polling) {
 		self.data.interval = setIntervalAsync(async () => {
 			try {
-				const response = await got.get(GetUrl(self), {})
-				const data = JSON.parse(response.body) as { lights: LightStatus[] }
-
-				self.updateVariables(data.lights[0])
+				const lights: KeyLightOptions = await self.keyLightApi.getLights()
+				self.updateVariables(lights)
 				self.updateStatus(InstanceStatus.Ok)
 			} catch (error) {
 				if (error !== null) {

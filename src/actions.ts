@@ -1,13 +1,12 @@
-import { InstanceStatus, type CompanionActionDefinitions, type CompanionActionEvent } from '@companion-module/base'
-import { got } from 'got'
+import { InstanceStatus, CompanionActionDefinitions, CompanionActionEvent } from '@companion-module/base'
 import { getKelvin, getMired, toNumber } from './utils.js'
 import { ModuleInstance } from './main.js'
-import { LightStatus } from './utils.js'
+import { KeyLightOptions, KeyLightStatus } from './api/types/KeyLight.js'
 
 export function UpdateActions(self: ModuleInstance): void {
 	const actions: CompanionActionDefinitions = {}
 
-	actions.power = {
+	actions.on = {
 		name: 'Power',
 		options: [
 			{
@@ -113,10 +112,10 @@ export async function RunAction(self: ModuleInstance, action: CompanionActionEve
 		return
 	}
 
-	const lightObj: Partial<LightStatus> = {}
+	const lightObj: Partial<KeyLightStatus> = {}
 
 	switch (action.actionId) {
-		case 'power': {
+		case 'on': {
 			const boolValue = action.options.bool
 			lightObj.on = boolValue === 'on' ? 1 : 0
 			break
@@ -165,23 +164,18 @@ export async function RunAction(self: ModuleInstance, action: CompanionActionEve
 	}
 
 	if (Object.keys(lightObj).length > 0) {
-		const cmd = { lights: [lightObj] }
-		const options = {
-			json: cmd,
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			timeout: {
-				request: 10000,
-			},
-		}
-
 		try {
-			const response = await got.put(self.getUrl(), options)
-			const data = JSON.parse(response.body) as { lights: LightStatus[] }
+			const keyLightOptions: KeyLightOptions = {
+				lights: [lightObj as KeyLightStatus],
+			}
+			const data = await self.keyLightApi.updateLightOptions(keyLightOptions)
 			self.updateStatus(InstanceStatus.Ok)
-			self.updateVariables(data.lights[0])
+			self.updateVariables(data)
 		} catch (error) {
+			self.log(
+				'error',
+				`Error updating light options: ${JSON.stringify(lightObj)}. Type: ${action.actionId}. Error: ${JSON.stringify}`,
+			)
 			const errorMessage = error instanceof Error ? error.message : JSON.stringify(error)
 			self.log('error', `action error: ${errorMessage}`)
 			if (error !== null) {

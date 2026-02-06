@@ -8,9 +8,13 @@ import { GetUrl, InitPolling } from './polling.js'
 import { UpgradeScripts } from './upgrades.js'
 import { getMired, LightStatus, VariableMap } from './utils.js'
 import { UpdateVariableDefinitions, UpdateVariables } from './variables.js'
+import { ElgatoKeylightApi } from './api/ElgatoKeyLightApi.js'
+import { KeyLightOptions } from './api/types/KeyLight.js'
 
 export class ModuleInstance extends InstanceBase<ModuleConfig> {
 	config!: ModuleConfig
+	keyLightApi!: ElgatoKeylightApi
+	port = 9123
 	data: {
 		status: LightStatus
 		interval: SetIntervalAsyncTimer<[]> | null
@@ -79,6 +83,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 			this.config = config
 		}
 
+		this.keyLightApi = new ElgatoKeylightApi(this.config.ip, this.port)
 		this.updateStatus(InstanceStatus.Connecting)
 		this.updateActions()
 		this.updateFeedbacks()
@@ -103,8 +108,8 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 		UpdateVariableDefinitions(this)
 	}
 
-	updateVariables(status: LightStatus): void {
-		UpdateVariables(this, status)
+	updateVariables(lights: KeyLightOptions): void {
+		UpdateVariables(this, lights)
 	}
 
 	getUrl(): string {
