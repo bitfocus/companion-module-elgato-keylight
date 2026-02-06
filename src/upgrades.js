@@ -1,6 +1,7 @@
 const { getKelvin, getMired } = require('./utils')
-module.exports = {
-	upgradeV1_2_0(context, props) {
+
+module.exports = [
+	function upgradeV1_2_0(context, props) {
 		const result = {
 			updatedConfig: null,
 			updatedActions: [],
@@ -9,7 +10,7 @@ module.exports = {
 
 		for (const action of props.actions) {
 			if (action.actionId === 'colortemp') {
-				const kelvin = getKelvin(parseInt(action.options.temp))
+				const kelvin = getKelvin(parseInt(action.options.temp, 10))
 				const mired = getMired(kelvin)
 
 				if (action.options.temp !== mired) {
@@ -21,4 +22,4 @@ module.exports = {
 
 		return result
 	},
-}
+]

@@ -1,23 +1,15 @@
 const { InstanceBase, InstanceStatus, runEntrypoint } = require('@companion-module/base')
-const polling = require('./polling')
-const actions = require('./actions')
-const variables = require('./variables')
-const feedbacks = require('./feedbacks')
-const configFields = require('./configFields')
-const upgradeScripts = require('./upgrades')
+const Actions = require('./actions')
+const ConfigFields = require('./configFields')
+const Feedbacks = require('./feedbacks')
+const Polling = require('./polling')
+const UpgradeScripts = require('./upgrades')
+const Variables = require('./variables')
 const { getMired } = require('./utils')
 
 class ElgatoKeylightInstance extends InstanceBase {
 	constructor(internal) {
 		super(internal)
-
-		Object.assign(this, {
-			...configFields,
-			...actions,
-			...variables,
-			...feedbacks,
-			...polling,
-		})
 
 		this.data = {
 			status: {
@@ -55,7 +47,7 @@ class ElgatoKeylightInstance extends InstanceBase {
 	}
 
 	async init(config) {
-		this.updateStatus(InstanceStatus.Connecting)
+		this.config = config
 		this.configUpdated(config)
 	}
 
@@ -74,13 +66,45 @@ class ElgatoKeylightInstance extends InstanceBase {
 			this.config = config
 		}
 
+		this.updateStatus(InstanceStatus.Connecting)
+		this.updateActions()
+		this.updateFeedbacks()
 		this.updateVariableDefinitions()
-		this.initActions()
-		this.initFeedbacks()
-
-		this.initPolling()
+		await this.initPolling()
 		this.updateStatus(InstanceStatus.Ok)
+	}
+
+	getConfigFields() {
+		return ConfigFields.getConfigFields(this)
+	}
+
+	updateActions() {
+		Actions.updateActions(this)
+	}
+
+	updateFeedbacks() {
+		Feedbacks.updateFeedbacks(this)
+	}
+
+	updateVariableDefinitions() {
+		Variables.updateVariableDefinitions(this)
+	}
+
+	updateVariables(status) {
+		Variables.updateVariables(this, status)
+	}
+
+	getUrl() {
+		return Polling.getUrl(this)
+	}
+
+	async initPolling() {
+		await Polling.initPolling(this)
+	}
+
+	async runAction(action) {
+		await Actions.runAction(this, action)
 	}
 }
 
-runEntrypoint(ElgatoKeylightInstance, [upgradeScripts.upgradeV1_2_0])
+runEntrypoint(ElgatoKeylightInstance, UpgradeScripts)
