@@ -1,6 +1,6 @@
 import { InstanceStatus } from '@companion-module/base'
 import { clearIntervalAsync, setIntervalAsync } from 'set-interval-async'
-import { got } from 'got-cjs'
+import { got } from 'got'
 import { ModuleInstance } from './main.js'
 import { LightStatus } from './utils.js'
 

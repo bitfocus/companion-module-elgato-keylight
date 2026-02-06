@@ -1,5 +1,5 @@
 import { InstanceStatus, type CompanionActionDefinitions, type CompanionActionEvent } from '@companion-module/base'
-import { got } from 'got-cjs'
+import { got } from 'got'
 import { getKelvin, getMired, toNumber } from './utils.js'
 import { ModuleInstance } from './main.js'
 import { LightStatus } from './utils.js'

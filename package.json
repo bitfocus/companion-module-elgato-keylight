@@ -16,7 +16,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"@companion-module/base": "~1.14.1",
-		"got-cjs": "^12.5.4",
+		"got": "^14.4.5",
 		"set-interval-async": "^3.0.3"
 	},
 	"devDependencies": {
