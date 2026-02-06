@@ -1,6 +1,7 @@
-const { Regex } = require('@companion-module/base')
+import { Regex, type SomeCompanionConfigField } from '@companion-module/base'
+import { ModuleInstance } from './main.js'
 
-const getConfigFields = function (self) {
+export function GetConfigFields(self: ModuleInstance): SomeCompanionConfigField[] {
 	return [
 		{
 			type: 'static-text',
@@ -31,12 +32,9 @@ const getConfigFields = function (self) {
 			label: `Polling interval in milliseconds (default: ${self.INTERVAL_DEFAULT}, min: ${self.INTERVAL_MIN})`,
 			width: 12,
 			min: self.INTERVAL_MIN,
+			max: 60000,
 			default: self.INTERVAL_DEFAULT,
 			required: true,
 		},
 	]
-}
-
-module.exports = {
-	getConfigFields,
 }

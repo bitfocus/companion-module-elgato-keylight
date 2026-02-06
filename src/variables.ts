@@ -1,6 +1,7 @@
-const { isFunction, getKelvin } = require('./utils')
+import { ModuleInstance } from './main.js'
+import { getKelvin, isFunction, LightStatus } from './utils.js'
 
-const updateVariableDefinitions = function (self) {
+export function UpdateVariableDefinitions(self: ModuleInstance): void {
 	self.data.variables = {}
 
 	if (!self.config.polling) {
@@ -10,7 +11,7 @@ const updateVariableDefinitions = function (self) {
 
 	self.data.variables.on = {
 		name: 'Light Power Status',
-		variableId: 'power',
+		variableId: 'on',
 		getValue: (value) => self.POWER_VALUES[value],
 	}
 
@@ -34,26 +35,29 @@ const updateVariableDefinitions = function (self) {
 	)
 }
 
-const updateVariables = function (self, status) {
-	Object.keys(self.data.variables).forEach((id) => {
-		const variables = {}
-		const value = status[id]
-		const name = self.data.variables[id].variableId
+export function UpdateVariables(self: ModuleInstance, status: LightStatus): void {
+	for (const id of Object.keys(self.data.variables)) {
+		const variable = self.data.variables[id]
+		if (!variable) {
+			continue
+		}
 
+		const value = status[id as keyof LightStatus]
+		if (value === undefined || value === null) {
+			continue
+		}
+
+		const name = variable.variableId
 		if (self.data.status[name] !== value) {
 			self.data.status[name] = value
-			if (isFunction(self.data.variables[id].getValue)) {
-				variables[name] = self.data.variables[id].getValue(value)
+			const variables: Record<string, string | number> = {}
+			if (isFunction(variable.getValue)) {
+				variables[name] = variable.getValue(value)
 			} else {
 				variables[name] = value
 			}
 			self.setVariableValues(variables)
 			self.checkFeedbacks(name)
 		}
-	})
-}
-
-module.exports = {
-	updateVariableDefinitions,
-	updateVariables,
+	}
 }

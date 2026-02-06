@@ -1,14 +1,17 @@
 {
 	"name": "elgato-keylight",
-	"version": "2.2.0",
-	"main": "src/index.js",
+	"version": "3.0.0",
+	"main": "dist/main.js",
+	"type": "module",
 	"scripts": {
 		"postinstall": "husky",
-		"package:dev": "companion-module-build --dev",
-		"package": "companion-module-build",
+		"format": "prettier -w .",
+		"package": "run build && companion-module-build",
+		"build": "rimraf dist && run build:main",
+		"build:main": "tsc -p tsconfig.build.json",
+		"dev": "tsc -p tsconfig.build.json --watch",
 		"lint:raw": "eslint",
-		"lint": "run lint:raw .",
-		"format": "prettier -w ."
+		"lint": "run lint:raw ."
 	},
 	"license": "MIT",
 	"dependencies": {
@@ -18,11 +21,14 @@
 	},
 	"devDependencies": {
 		"@companion-module/tools": "^2.6.1",
+		"@types/node": "^22.19.3",
 		"eslint": "^9.28.0",
 		"husky": "^9.1.7",
 		"lint-staged": "^15.5.2",
 		"prettier": "^3.7.4",
-		"rimraf": "^6.0.1"
+		"rimraf": "^6.0.1",
+		"typescript": "~5.9.3",
+		"typescript-eslint": "^8.51.0"
 	},
 	"prettier": "@companion-module/tools/.prettierrc.json",
 	"lint-staged": {
