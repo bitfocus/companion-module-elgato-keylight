@@ -1,16 +1,20 @@
 import {
 	combineRgb,
-	type CompanionAdvancedFeedbackDefinition,
-	type CompanionFeedbackDefinitions,
-	type SomeCompanionFeedbackInputField,
-	type CompanionFeedbackAdvancedEvent,
+	CompanionAdvancedFeedbackDefinition,
+	SomeCompanionFeedbackInputField,
+	CompanionFeedbackAdvancedEvent,
+	CompanionFeedbackDefinition,
 } from '@companion-module/base'
 import { isFunction } from './utils.js'
 import { ModuleInstance } from './main.js'
 
-export function UpdateFeedbacks(self: ModuleInstance): void {
-	const feedbacks: CompanionFeedbackDefinitions = {}
+export enum FeedbackId {
+	on = 'on',
+	brightness = 'brightness',
+	temperature = 'temperature',
+}
 
+export function UpdateFeedbacks(self: ModuleInstance): void {
 	const foregroundColor = {
 		type: 'colorpicker',
 		label: 'Foreground color',
@@ -60,15 +64,18 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 		description,
 		options,
 		callback: (feedback: CompanionFeedbackAdvancedEvent) => {
-			const variable = feedback.feedbackId === 'on' ? self.data.variables.on : self.data.variables[feedback.feedbackId]
+			const variable =
+				feedback.feedbackId === FeedbackId.on.toString()
+					? self.data.variables.on
+					: self.data.variables[feedback.feedbackId]
 			if (!variable) {
 				return {}
 			}
 
 			const statusKey = variable.variableId
 			const currentValue = isFunction(variable.getValue)
-				? variable.getValue(self.data.status[statusKey])
-				: self.data.status[statusKey]
+				? variable.getValue(self.data.keylight.options?.lights[0][statusKey])
+				: self.data.keylight.options?.lights[0][statusKey]
 			const optionValue = feedback.options[feedback.feedbackId]
 			const feedbackValue = isFunction(variable.getValue) ? variable.getValue(Number(optionValue)) : optionValue
 
@@ -80,24 +87,23 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 			return {}
 		},
 	})
-
-	feedbacks.on = buildValueFeedback('Power Status', 'When light power status changes, change colors of the bank', [
-		selectPower,
-		foregroundColor,
-		backgroundColor,
-	])
-
-	feedbacks.brightness = buildValueFeedback('Brightness', 'When light brightness changes, change colors of the bank', [
-		selectBrightness,
-		foregroundColor,
-		backgroundColor,
-	])
-
-	feedbacks.temperature = buildValueFeedback(
-		'Color temperature',
-		'When light color temperature changes, change colors of the bank',
-		[selectTemperature, foregroundColor, backgroundColor],
-	)
+	const feedbacks: { [id in FeedbackId]: CompanionFeedbackDefinition | undefined } = {
+		[FeedbackId.on]: buildValueFeedback('Power Status', 'When light power status changes, change colors of the bank', [
+			selectPower,
+			foregroundColor,
+			backgroundColor,
+		]),
+		[FeedbackId.brightness]: buildValueFeedback(
+			'Brightness',
+			'When light brightness changes, change colors of the bank',
+			[selectBrightness, foregroundColor, backgroundColor],
+		),
+		[FeedbackId.temperature]: buildValueFeedback(
+			'Color temperature',
+			'When light color temperature changes, change colors of the bank',
+			[selectTemperature, foregroundColor, backgroundColor],
+		),
+	}
 
 	self.setFeedbackDefinitions(feedbacks)
 }
