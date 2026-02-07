@@ -22,6 +22,7 @@ export class ElgatoKeylightApi {
 		timeout: { request: 10000 },
 		responseType: 'json',
 		resolveBodyOnly: true,
+		retry: { limit: 10 },
 	})
 
 	async getSettings(): Promise<KeyLightSettings> {
