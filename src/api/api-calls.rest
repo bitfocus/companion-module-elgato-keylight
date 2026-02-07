@@ -1,0 +1,26 @@
+@baseurl = http://192.168.8.182:9123/elgato/
+@lightsUrl = {{baseurl}}lights
+@settingsUrl = {{lightsUrl}}/settings
+@infoUrl = {{baseurl}}accessory-info
+# Turn the light on
+PUT {{lightsUrl}} HTTP/1.2
+content-type: application/json
+
+{
+    "lights": [{"on": 1}]
+}
+
+# Turn the light off
+
+PUT {{lightsUrl}} HTTP/1.2
+content-type: application/json
+
+{
+    "lights": [{"on": 0}]
+}
+
+GET {{lightsUrl}} HTTP/1.2
+
+GET {{settingsUrl}} HTTP/1.2
+
+GET {{infoUrl}} HTTP/1.2

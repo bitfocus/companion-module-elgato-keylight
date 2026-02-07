@@ -1,18 +1,22 @@
 import { InstanceBase, InstanceStatus, runEntrypoint, SomeCompanionConfigField } from '@companion-module/base'
 import { clearIntervalAsync, type SetIntervalAsyncTimer } from 'set-interval-async'
-import { UpdateActions } from './actions.js'
+import { SetActionDefinitions } from './actions.js'
 import { GetConfigFields } from './config.js'
 import { type ModuleConfig } from './utils.js'
 import { UpdateFeedbacks } from './feedbacks.js'
 import { GetUrl, InitPolling } from './polling.js'
 import { UpgradeScripts } from './upgrades.js'
-import { getMired, LightStatus, VariableMap } from './utils.js'
+import { getMired, VariableMap } from './utils.js'
 import { UpdateVariableDefinitions, UpdateVariables } from './variables.js'
+import { ElgatoKeylightApi } from './api/ElgatoKeyLightApi.js'
+import { KeyLight } from './api/types/KeyLight.js'
 
 export class ModuleInstance extends InstanceBase<ModuleConfig> {
 	config!: ModuleConfig
+	keyLightApi!: ElgatoKeylightApi
+	port = 9123
 	data: {
-		status: LightStatus
+		keylight: KeyLight
 		interval: SetIntervalAsyncTimer<[]> | null
 		variables: VariableMap
 	}
@@ -39,10 +43,44 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 		super(internal)
 
 		this.data = {
-			status: {
-				on: null,
-				brightness: 0,
-				temperature: 0,
+			keylight: {
+				ip: '',
+				port: 0,
+				name: '',
+				settings: {
+					powerOnBehavior: 0,
+					powerOnBrightness: 0,
+					powerOnTemperature: 0,
+					switchOnDurationMs: 0,
+					switchOffDurationMs: 0,
+					colorChangeDurationMs: 0,
+				},
+				info: {
+					productName: '',
+					hardwareBoardType: 0,
+					hardwareRevision: 0,
+					macAddress: '',
+					firmwareBuildNumber: 0,
+					firmwareVersion: '',
+					serialNumber: '',
+					displayName: '',
+					features: ['lights'],
+					'wifi-info': {
+						ssid: '',
+						frequencyMHz: 0,
+						rssi: 0,
+					},
+				},
+				options: {
+					numberOfLights: 0,
+					lights: [
+						{
+							on: 0,
+							brightness: 0,
+							temperature: 0,
+						},
+					],
+				},
 			},
 			interval: null,
 			variables: {},
@@ -79,6 +117,10 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 			this.config = config
 		}
 
+		this.data.keylight.ip = this.config.ip
+		this.data.keylight.port = this.port
+
+		this.keyLightApi = new ElgatoKeylightApi(this.config.ip, this.port)
 		this.updateStatus(InstanceStatus.Connecting)
 		this.updateActions()
 		this.updateFeedbacks()
@@ -92,7 +134,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 	}
 
 	updateActions(): void {
-		UpdateActions(this)
+		SetActionDefinitions(this)
 	}
 
 	updateFeedbacks(): void {
@@ -103,8 +145,8 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 		UpdateVariableDefinitions(this)
 	}
 
-	updateVariables(status: LightStatus): void {
-		UpdateVariables(this, status)
+	updateVariables(): void {
+		UpdateVariables(this)
 	}
 
 	getUrl(): string {
