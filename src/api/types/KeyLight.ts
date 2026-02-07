@@ -1,10 +1,10 @@
 export interface KeyLight {
 	ip: string
 	port: number
-	name?: string
-	settings?: KeyLightSettings
-	info?: KeyLightInfo
-	options?: KeyLightOptions
+	name: string
+	settings: KeyLightSettings
+	info: KeyLightInfo
+	options: KeyLightOptions
 }
 
 export interface KeyLightSettings {
@@ -36,7 +36,7 @@ export interface WifiInfo {
 }
 
 export interface KeyLightStatus {
-	on: number | null
+	on: number
 	brightness: number
 	temperature: number
 }
