@@ -11,6 +11,10 @@
 
 <!-- Append new learnings below. Each entry is something lasting about the project. -->
 
+- Advanced Key Light feedbacks should read directly from fresh `self.data.keylight.options.lights[0]` state, not from a side cache; `src/feedbacks.ts`, `src/variables.ts`, `src/polling.ts`, and `src/actions.ts` form the full refresh path.
+- `UpdateVariables()` is the safe re-evaluation choke point: it sets current variables, then calls `self.checkFeedbacks()` so both poll results and action responses restyle Companion buttons.
+- Offline or stale light state must clear power/brightness/temperature feedback matches instead of treating fallback `0` values as real device state; freshness is tracked in `src/main.ts` and invalidated on failed light reads or failed write responses.
+
 ## Team Updates — 2026-04-26
 
 **Feedback Behavior Fix Revision Cycle**
@@ -19,3 +23,13 @@
 - Three blockers to resolve: stale variable cache, missing polling integration, missing text support in advanced feedback.
 - Validation required: power feedback polling updates, brightness/temperature evaluation, offline/error state handling.
 - Orchestration and session logs created for cycle tracking.
+
+### Revision Complete — 2026-04-26T02:15:33Z
+
+- **Status:** ✅ Approved by Zoe
+- **Fixes Implemented:**
+  - Removed dependency on unpopulated `self.data.variables`; now reads directly from fresh `self.data.keylight.options.lights[0]`
+  - Added `checkFeedbacks()` call in `src/polling.ts` after light state updates
+  - Implemented text override support in advanced feedback results
+- **Validation:** `yarn build` ✅, targeted lint ✅, all regression checks ✅
+- **Ready for integration**

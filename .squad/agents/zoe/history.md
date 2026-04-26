@@ -9,6 +9,13 @@
 
 ## Learnings
 
+### 2026-04-26: Wash feedback revision review
+
+- Wash's revision now resolves feedback matches through `ModuleInstance.getLightStatus()` instead of the dead variable metadata path, so feedbacks evaluate against live `keylight.options.lights[0]` state.
+- `src/variables.ts` is now the central refresh hook: after `setVariableValues(...)` it also runs `checkFeedbacks()`, which means both polling and successful/failed action updates re-evaluate button feedbacks.
+- Offline safety now depends on `src/main.ts` freshness tracking (`lightStatus.isValid` + `lastUpdatedAt`) with invalidation on polling/action failures; stale light-state variables now surface as `$NA. Light State Unavailable`.
+- Reviewer validation for this module is `yarn build` plus linting the touched TS sources when workspace-level `yarn lint` is polluted by unrelated non-module files.
+
 <!-- Append new learnings below. Each entry is something lasting about the project. -->
 
 ### 2026-04-26: Feedback regression review
@@ -60,3 +67,16 @@
 - Three issues identified: stale variable cache in feedbacks.ts, missing polling integration, no text support in advanced feedback.
 - Wash assigned to implement comprehensive revision addressing all blockers.
 - Regression checks defined: power feedback polling updates, brightness/temperature evaluation, offline/error state transitions.
+
+### Revision Complete — 2026-04-26T02:15:33Z
+
+- **Status:** ✅ Approved
+- **Review Outcome:**
+  - Live light state feedback evaluation working correctly
+  - `checkFeedbacks()` refresh on polling updates confirmed
+  - `checkFeedbacks()` refresh on action response completion confirmed
+  - Advanced text override support implemented
+  - Safe stale/offline state clearing validated
+- **Build & Lint:** ✅ passed
+- **All regression checks passed**
+- **Ready for production integration**
