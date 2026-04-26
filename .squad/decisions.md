@@ -88,7 +88,45 @@ Color temperature feedbacks should compare and store rounded Kelvin values, even
 - `yarn lint:raw src/feedbacks.ts src/variables.ts src/utils.ts src/main.ts src/polling.ts src/upgrades.ts src/actions.ts` ✅
 - `yarn lint` ⚠️ blocked by unrelated `.squad-archive-*` files, not by this revision
 
-## 2026-04-26: Boolean Feedback Migration
+## 2026-04-25/26: Boolean Feedback Migration
+
+### User Directive: Boolean Feedbacks with Empty Text Guard
+
+For boolean feedback upgrade scripts, only include migrated text change style properties when the previous feedback text was not empty.
+
+**Source:** User request (Justin James via Copilot)
+
+### Kaylee Decision: Skip empty text during boolean feedback migration
+
+When migrating legacy advanced feedbacks to boolean feedbacks, only copy the saved `text` option into `feedback.style.text` if that legacy text is non-empty.
+
+**Why:**
+
+- An empty migrated `style.text` overrides the button label with a blank string, which is worse than leaving Companion's normal text alone.
+- Operators still expect their saved foreground/background colors to carry forward even when they never configured custom feedback text.
+
+**Implementation:**
+
+- Keep using the boolean-feedback upgrade path for `fg → color` and `bg → bgcolor`.
+- Remove the legacy `text` option either way, but only populate `style.text` (and therefore `textExpression`) when the saved text is not `''`.
+
+### Zoe Decision: Approve boolean feedback text migration
+
+**Verdict:** Approve Kaylee's migration revision after narrowing the text carry-over path.
+
+**Why:**
+
+- `src/upgrades.ts` now removes the legacy `text` option during advanced→boolean feedback migration without copying empty-string values into `feedback.style.text`.
+- Non-empty saved text still migrates forward and remains eligible for `style.textExpression = true` in the follow-up upgrade step.
+- This closes the regression where an empty legacy text field would become an explicit blank active label on upgraded boolean feedbacks.
+
+**Validation:**
+
+- `yarn build` ✅
+- `yarn lint` ⚠️ fails only on unrelated `.squad-archive-*` files
+- `yarn lint:raw src/feedbacks.ts src/upgrades.ts src/main.ts src/utils.ts src/actions.ts src/polling.ts src/variables.ts` ✅
+
+## 2026-04-26: Boolean Feedback Migration (Previous Section)
 
 ### User Directive: Boolean Feedbacks with Style Migration
 

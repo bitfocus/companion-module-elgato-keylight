@@ -154,3 +154,19 @@
 - 2026-04-26T02-41-16Z-zoe.md
 
 **Session Log Created:** 2026-04-26T02-41-16Z-boolean-feedbacks-approved.md
+
+### 2026-04-26: Boolean feedback text-migration review
+
+- `src/upgrades.ts` now migrates legacy boolean-feedback colors with `CreateConvertToBooleanFeedbackUpgradeScript(...)`, but only copies the legacy `text` option into `feedback.style.text` when the saved text is a non-empty string.
+- The migration still deletes the old `feedback.options.text` key even when it was empty, so upgraded buttons keep their prior colors without accidentally blanking the active button label.
+- Reviewer validation for this revision: `yarn build` passed, repo-wide `yarn lint` still fails only on unrelated `.squad-archive-*` files, and targeted `yarn lint:raw src/feedbacks.ts src/upgrades.ts src/main.ts src/utils.ts src/actions.ts src/polling.ts src/variables.ts` passed.
+
+### 2026-04-26: Boolean feedback text migration review — 2026-04-26T02:49:57Z
+
+- Kaylee's revision now removes legacy `text` option during advanced→boolean feedback migration without copying empty-string values into `feedback.style.text`
+- Non-empty saved text still migrates forward and remains eligible for `style.textExpression = true` in follow-up upgrade step
+- Closes regression where empty legacy text field would become explicit blank active label on upgraded boolean feedbacks
+- Validation: `yarn build` ✅, targeted `yarn lint:raw` ✅
+- Status: ✅ Approved
+
+**Orchestration Log Created:** 2026-04-26T02-49-57Z-zoe.md

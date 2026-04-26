@@ -17,6 +17,7 @@
 - `src/variables.ts` is the reliable refresh point for operator-facing state: after `setVariableValues()`, call `self.checkFeedbacks()` so polling and action updates immediately restyle buttons.
 - Validation for this module currently uses `yarn build` and `yarn lint`; full-repo lint can be polluted by workspace-level `.squad` archive files, so source-file linting on changed module files is a useful sanity check while keeping module work isolated.
 - Temperature UI in this module is operator-facing Kelvin, but device state is raw mired: when `src/variables.ts` and `src/feedbacks.ts` need to agree, normalize both sides with `getKelvin(...)` or feedback matches can miss values like a displayed `5600K`.
+- `src/upgrades.ts` should only migrate legacy boolean-feedback `text` into `feedback.style.text` when the saved text is non-empty; still remove the old option key and keep color/background migration unchanged so buttons do not get blank labels after upgrade.
 
 ## Team Updates — 2026-04-26
 
@@ -50,3 +51,17 @@
 - Ready for next phase
 
 **Orchestration Log Created:** 2026-04-26T02-41-16Z-kaylee.md
+
+### Boolean Feedback Text Migration Guard — 2026-04-26T02:49:57Z
+
+**Kaylee Status:** ✅ Text migration guard approved by Zoe.
+
+- Updated upgrade logic to skip empty text during boolean feedback migration
+- Legacy `text` option always removed; `style.text` only populated when saved text is non-empty
+- Prevents regression where empty migrated text would create blank active labels
+- Preserves color/background migration for all cases
+- Validation: build passed ✅, targeted lint passed ✅
+
+**Key Decision:** "Kaylee Decision: Skip empty text during boolean feedback migration" — Empty migrated `style.text` overrides button labels with blank strings; better to leave Companion's normal text alone while preserving color/background carry-forward.
+
+**Orchestration Log Created:** 2026-04-26T02-49-57Z-kaylee.md

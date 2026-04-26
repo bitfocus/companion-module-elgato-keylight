@@ -23,6 +23,7 @@ Use this skill when a Companion module has feedback definitions that should reac
 - If a feedback dropdown ever changes from raw device IDs to operator-facing IDs, add an upgrade script so saved feedback options migrate to the new unit and still appear correctly selected in Companion.
 - If you convert an advanced feedback with custom text/color options into a boolean feedback, migrate those option values into `feedback.style` and set `style.textExpression = true` when text should keep supporting variables.
 - When converting advanced feedbacks to boolean feedbacks, use `CreateConvertToBooleanFeedbackUpgradeScript(...)` to migrate legacy option keys like `text`, `fg`, and `bg` into Companion style fields (`text`, `color`, `bgcolor`).
+- If the legacy text option may be saved as an empty string, do not copy that value into `style.text`; remove the old option key, keep migrating colors, and only enable `textExpression` when the migrated text is non-empty.
 - Keep the runtime comparison tolerant of both the legacy and new stored formats during the transition, so old buttons still match even before Companion has persisted the migrated value.
 - After `setVariableValues()`, call `self.checkFeedbacks()` so Companion re-evaluates button styles whenever fresh state arrives.
 - Track whether the polled device state is still fresh; if polling fails or a write request fails, invalidate that state so feedbacks clear instead of matching fallback defaults.
