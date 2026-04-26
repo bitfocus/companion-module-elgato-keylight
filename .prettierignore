@@ -7,3 +7,7 @@ yarn.lock
 
 # Docs
 CHANGELOG.md
+
+.squad/**
+.copilot/**
+.github/**
