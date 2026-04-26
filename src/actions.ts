@@ -122,6 +122,17 @@ export function SetActionDefinitions(self: ModuleInstance): void {
 	self.setActionDefinitions(actions)
 }
 
+function getFreshLightStatus(self: ModuleInstance, actionId: string): KeyLightStatus | undefined {
+	const lightStatus = self.getLightStatus()
+	if (!lightStatus) {
+		const message = `Cannot run ${actionId} without fresh light state`
+		self.log('warn', message)
+		self.updateStatus(InstanceStatus.UnknownWarning, message)
+	}
+
+	return lightStatus
+}
+
 export async function RunAction(self: ModuleInstance, action: CompanionActionEvent): Promise<void> {
 	if (!self.config.ip) {
 		return
@@ -136,7 +147,11 @@ export async function RunAction(self: ModuleInstance, action: CompanionActionEve
 			break
 		}
 		case ActionId.powercycle.toString(): {
-			lightObj.on = 1 - self.data.keylight.options?.lights[0].on
+			const lightStatus = getFreshLightStatus(self, action.actionId)
+			if (!lightStatus) {
+				return
+			}
+			lightObj.on = 1 - lightStatus.on
 			break
 		}
 		case ActionId.colortemp.toString(): {
@@ -145,8 +160,12 @@ export async function RunAction(self: ModuleInstance, action: CompanionActionEve
 			break
 		}
 		case ActionId.colortempchange.toString(): {
+			const lightStatus = getFreshLightStatus(self, action.actionId)
+			if (!lightStatus) {
+				return
+			}
 			const delta = toNumber(action.options.delta)
-			const newTemp = getKelvin(self.data.keylight.options?.lights[0].temperature) + delta
+			const newTemp = getKelvin(lightStatus.temperature) + delta
 			if (newTemp > self.KELVIN_MAX) {
 				self.log('info', `Attempted to increase temperature beyond max value. Type: ${action.actionId}`)
 				return
@@ -159,8 +178,12 @@ export async function RunAction(self: ModuleInstance, action: CompanionActionEve
 			break
 		}
 		case ActionId.brightnesschange.toString(): {
+			const lightStatus = getFreshLightStatus(self, action.actionId)
+			if (!lightStatus) {
+				return
+			}
 			const delta = toNumber(action.options.delta)
-			lightObj.brightness = self.data.keylight.options?.lights[0].brightness + delta
+			lightObj.brightness = lightStatus.brightness + delta
 			if (lightObj.brightness > self.BRIGHTNESS_MAX) {
 				self.log('info', `Attempted to increase brightness beyond max value. Type: ${action.actionId}`)
 				return
@@ -185,9 +208,16 @@ export async function RunAction(self: ModuleInstance, action: CompanionActionEve
 			}
 			const data = await self.keyLightApi.updateLightOptions(keyLightOptions)
 			self.data.keylight.options = data
+			if (data.lights[0]) {
+				self.markLightStatusUpdated()
+			} else {
+				self.invalidateLightStatus()
+			}
 			self.updateStatus(InstanceStatus.Ok)
 			self.updateVariables()
 		} catch (error) {
+			self.invalidateLightStatus()
+			self.updateVariables()
 			self.log(
 				'error',
 				`Error updating light options: ${JSON.stringify(lightObj)}. Type: ${action.actionId}. Error: ${JSON.stringify}`,

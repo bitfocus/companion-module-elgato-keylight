@@ -1,11 +1,10 @@
 import {
 	combineRgb,
-	CompanionAdvancedFeedbackDefinition,
-	SomeCompanionFeedbackInputField,
-	CompanionFeedbackAdvancedEvent,
+	CompanionBooleanFeedbackDefinition,
 	CompanionFeedbackDefinition,
+	SomeCompanionFeedbackInputField,
 } from '@companion-module/base'
-import { isFunction } from './utils.js'
+import { ModuleStatusKey, normalizeTemperatureSelection, type TemperatureValueBounds } from './utils.js'
 import { ModuleInstance } from './main.js'
 
 export enum FeedbackId {
@@ -14,21 +13,40 @@ export enum FeedbackId {
 	temperature = 'temperature',
 }
 
+function getTemperatureValueBounds(self: ModuleInstance): TemperatureValueBounds {
+	return {
+		miredMin: self.MIRED_MIN,
+		miredMax: self.MIRED_MAX,
+		kelvinMin: self.KELVIN_MIN,
+		kelvinMax: self.KELVIN_MAX,
+		kelvinStep: self.KELVIN_STEP,
+	}
+}
+
+function getComparableFeedbackValue(self: ModuleInstance, feedbackId: FeedbackId, value: unknown): number | null {
+	if (feedbackId !== FeedbackId.temperature) {
+		const parsedValue = Number(value)
+		return Number.isFinite(parsedValue) ? parsedValue : null
+	}
+
+	return normalizeTemperatureSelection(value, getTemperatureValueBounds(self))
+}
+
+function getComparableLightValue(self: ModuleInstance, feedbackId: FeedbackId, value: number | null): number | null {
+	if (feedbackId !== FeedbackId.temperature || value === null) {
+		return value
+	}
+
+	return normalizeTemperatureSelection(value, getTemperatureValueBounds(self))
+}
+
+const FEEDBACK_STATUS_KEYS: Record<FeedbackId, ModuleStatusKey> = {
+	[FeedbackId.on]: 'on',
+	[FeedbackId.brightness]: 'brightness',
+	[FeedbackId.temperature]: 'temperature',
+}
+
 export function UpdateFeedbacks(self: ModuleInstance): void {
-	const foregroundColor = {
-		type: 'colorpicker',
-		label: 'Foreground color',
-		id: 'fg',
-		default: combineRgb(255, 255, 255),
-	} satisfies SomeCompanionFeedbackInputField
-
-	const backgroundColor = {
-		type: 'colorpicker',
-		label: 'Background color',
-		id: 'bg',
-		default: combineRgb(255, 0, 0),
-	} satisfies SomeCompanionFeedbackInputField
-
 	const selectPower = {
 		type: 'dropdown',
 		label: 'Power Status',
@@ -50,58 +68,58 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 		type: 'dropdown',
 		label: 'Temperature in Kelvin',
 		id: 'temperature',
-		default: self.MIRED_MIN,
-		choices: self.TEMP_CHOICES,
+		default: self.KELVIN_MAX,
+		choices: self.KELVIN_LIST.map((kelvin) => ({ id: kelvin, label: `${kelvin}K` })),
 	} satisfies SomeCompanionFeedbackInputField
 
 	const buildValueFeedback = (
 		name: string,
 		description: string,
 		options: SomeCompanionFeedbackInputField[],
-	): CompanionAdvancedFeedbackDefinition => ({
-		type: 'advanced',
+	): CompanionBooleanFeedbackDefinition => ({
+		type: 'boolean',
 		name,
 		description,
+		defaultStyle: {
+			color: combineRgb(255, 255, 255),
+			bgcolor: combineRgb(255, 0, 0),
+			textExpression: true,
+		},
+		showInvert: false,
 		options,
-		callback: (feedback: CompanionFeedbackAdvancedEvent) => {
-			const variable =
-				feedback.feedbackId === FeedbackId.on.toString()
-					? self.data.variables.on
-					: self.data.variables[feedback.feedbackId]
-			if (!variable) {
-				return {}
+		callback: (feedback) => {
+			const feedbackId = feedback.feedbackId as FeedbackId
+			const statusKey = FEEDBACK_STATUS_KEYS[feedbackId]
+			if (!statusKey) {
+				return false
 			}
 
-			const statusKey = variable.variableId
-			const currentValue = isFunction(variable.getValue)
-				? variable.getValue(self.data.keylight.options?.lights[0][statusKey])
-				: self.data.keylight.options?.lights[0][statusKey]
-			const optionValue = feedback.options[feedback.feedbackId]
-			const feedbackValue = isFunction(variable.getValue) ? variable.getValue(Number(optionValue)) : optionValue
-
-			if (currentValue === feedbackValue) {
-				const fgValue = feedback.options.fg
-				const bgValue = feedback.options.bg
-				return { color: Number(fgValue), bgcolor: Number(bgValue) }
+			const lightStatus = self.getLightStatus()
+			if (!lightStatus) {
+				return false
 			}
-			return {}
+
+			const currentValue = getComparableLightValue(self, feedbackId, lightStatus[statusKey])
+			const feedbackValue = getComparableFeedbackValue(self, feedbackId, feedback.options[feedbackId])
+
+			return feedbackValue !== null && currentValue === feedbackValue
 		},
 	})
 	const feedbacks: { [id in FeedbackId]: CompanionFeedbackDefinition | undefined } = {
-		[FeedbackId.on]: buildValueFeedback('Power Status', 'When light power status changes, change colors of the bank', [
-			selectPower,
-			foregroundColor,
-			backgroundColor,
-		]),
+		[FeedbackId.on]: buildValueFeedback(
+			'Power Status',
+			'When light power status changes, change the button text/colors',
+			[selectPower],
+		),
 		[FeedbackId.brightness]: buildValueFeedback(
 			'Brightness',
-			'When light brightness changes, change colors of the bank',
-			[selectBrightness, foregroundColor, backgroundColor],
+			'When light brightness changes, change the button text/colors',
+			[selectBrightness],
 		),
 		[FeedbackId.temperature]: buildValueFeedback(
 			'Color temperature',
-			'When light color temperature changes, change colors of the bank',
-			[selectTemperature, foregroundColor, backgroundColor],
+			'When light color temperature changes, change the button text/colors',
+			[selectTemperature],
 		),
 	}
 

@@ -4,5 +4,5 @@ Please see HELP.md and LICENSE for more information.
 
 ## Planned Upgrades
 
-- Using GET to enable feedbacks for the Keylight.
+- Feedbacks are driven by polled GET state and clear safely when live light status is unavailable.
 - Adding multiactions for the Keylight (eg. adjust brightness and color temperature at the same time).
