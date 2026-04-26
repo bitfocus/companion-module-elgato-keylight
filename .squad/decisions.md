@@ -87,3 +87,49 @@ Color temperature feedbacks should compare and store rounded Kelvin values, even
 - `yarn build` ✅
 - `yarn lint:raw src/feedbacks.ts src/variables.ts src/utils.ts src/main.ts src/polling.ts src/upgrades.ts src/actions.ts` ✅
 - `yarn lint` ⚠️ blocked by unrelated `.squad-archive-*` files, not by this revision
+
+## 2026-04-26: Boolean Feedback Migration
+
+### User Directive: Boolean Feedbacks with Style Migration
+
+Turn the module feedbacks into boolean feedbacks, and include an upgrade script that sets text, color, and background color when the feedback triggers.
+
+**Rationale:** User request
+
+### Kaylee Decision: Preserve style text when converting feedbacks to boolean
+
+Key Light feedbacks should use boolean feedback definitions with built-in style fields, but the migration must also preserve any saved text override behavior.
+
+**Why:**
+
+- Companion applies boolean feedback styles from the saved feedback instance, not from the callback result.
+- Existing feedbacks stored `text`, `fg`, and `bg` as module options from the old advanced feedback shape.
+- Some operators may have used variables in the saved text override, so moving only the text value without enabling expression parsing would silently change behavior.
+
+**Implementation:**
+
+- Define `on`, `brightness`, and `temperature` as boolean feedbacks in `src/feedbacks.ts` with default active colors and `textExpression: true`.
+- Use `CreateConvertToBooleanFeedbackUpgradeScript(...)` to move legacy `text`, `fg`, and `bg` options into boolean feedback `style`.
+- Follow with a small upgrade step that sets `style.textExpression = true` whenever a migrated feedback has saved text.
+
+### Zoe Decision: Convert Key Light feedbacks to boolean with style migration
+
+The Key Light state-match feedbacks should be boolean feedbacks, with Companion-owned style fields, not advanced feedbacks that rebuild style payloads on every callback.
+
+**Why:**
+
+- The callback only decides whether the light state matches; boolean feedbacks are the right shape for that contract.
+- Companion already provides built-in style handling for boolean feedbacks, which makes text/color/background migration explicit and simpler to maintain.
+- Existing buttons still need their configured triggered text and colors preserved after the type change.
+
+**Implementation:**
+
+- Convert `src/feedbacks.ts` power, brightness, and temperature definitions from `advanced` to `boolean`.
+- Keep temperature comparison normalization against the same rounded Kelvin domain users see in Companion.
+- Add `CreateConvertToBooleanFeedbackUpgradeScript(...)` in `src/upgrades.ts` to migrate legacy `text`, `fg`, and `bg` option values into boolean feedback `style.text`, `style.color`, and `style.bgcolor`.
+
+**Validation:**
+
+- `yarn build` ✅
+- `yarn lint:raw src/feedbacks.ts src/upgrades.ts src/main.ts src/utils.ts src/actions.ts src/polling.ts src/variables.ts` ✅
+- `yarn lint` ⚠️ still fails only on unrelated `.squad-archive-*` files

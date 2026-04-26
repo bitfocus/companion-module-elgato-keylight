@@ -121,3 +121,36 @@
 - Ready for production integration.
 - Orchestration logs created: 2026-04-26T02:34:12Z-wash.md, 2026-04-26T02:34:12Z-zoe.md.
 - Session log created: 2026-04-26T02:34:12Z-temperature-feedback-approved.md.
+
+### 2026-04-26: Boolean feedback migration review
+
+- `src/feedbacks.ts` now defines the Key Light power, brightness, and temperature matchers as Companion boolean feedbacks, so the callback is pure state validation and Companion owns the triggered style.
+- `src/upgrades.ts` uses `CreateConvertToBooleanFeedbackUpgradeScript(...)` to move legacy advanced-feedback option fields (`text`, `fg`, `bg`) into boolean feedback style fields (`text`, `color`, `bgcolor`) while preserving the separate temperature normalization migration.
+- Reviewer verdict for this revision: `yarn build` passed, targeted `yarn lint:raw src/feedbacks.ts src/upgrades.ts src/main.ts src/utils.ts src/actions.ts src/polling.ts src/variables.ts` passed, and repo-wide `yarn lint` still fails only on unrelated `.squad-archive-*` files.
+
+### 2026-04-26: Boolean feedback migration approved — 2026-04-26T02:41:16Z
+
+**Kaylee Status:** ✅ Task complete. Converted feedbacks to boolean with style migration.
+
+- Boolean feedback definitions with default active colors and text expression support
+- Upgrade script preserves legacy `text`, `fg`, `bg` option values in boolean feedback `style`
+- Temperature feedback keeps normalized Kelvin comparison matching variable display values
+- Build validation passed ✅
+- Targeted lint validation passed ✅
+- Ready for next phase
+
+**Zoe Status:** ✅ Review complete. Approved migration.
+
+- Validated boolean feedback definitions and style migration script
+- Confirmed temperature feedback uses normalized Kelvin path matching user-visible variables
+- Confirmed upgrade script preserves trigger styling and text expression parsing
+- Build validation passed ✅
+- Targeted lint validation passed ✅
+- Ready for production integration
+
+**Orchestration Logs Created:**
+
+- 2026-04-26T02-41-16Z-kaylee.md
+- 2026-04-26T02-41-16Z-zoe.md
+
+**Session Log Created:** 2026-04-26T02-41-16Z-boolean-feedbacks-approved.md
