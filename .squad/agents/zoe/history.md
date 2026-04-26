@@ -104,3 +104,20 @@
 - Stale/offline state clearing validated
 
 **Orchestration Log Created:** 2026-04-26T02-28-20Z-zoe.md
+
+### 2026-04-26: Kelvin feedback revision verdict
+
+- `src/feedbacks.ts` now normalizes both the configured temperature option and the live `lights[0].temperature` reading through `normalizeTemperatureSelection(...)`, so feedback matching happens in the same rounded Kelvin domain shown by `src/variables.ts`.
+- `src/upgrades.ts` adds a temperature feedback migration that rewrites legacy saved values (raw mired IDs or Kelvin strings) to rounded Kelvin dropdown IDs, while the runtime comparison still tolerates legacy values before migration persists.
+- Reviewer validation for this bugfix: `yarn build` passed, targeted `yarn lint:raw src/feedbacks.ts src/variables.ts src/utils.ts src/main.ts src/polling.ts src/upgrades.ts src/actions.ts` passed, and repo-wide `yarn lint` still fails only on unrelated `.squad-archive-*` files.
+
+### 2026-04-26: Temperature feedback normalization cycle complete
+
+**Wash & Zoe cycle outcome:**
+
+- Wash implemented centralized temperature normalization in `src/utils.ts` and added feedback upgrade in `src/upgrades.ts`.
+- Zoe validated all changes: build passed, targeted lint passed, backward compatibility confirmed.
+- Decision merged to decisions.md. Inbox files cleared.
+- Ready for production integration.
+- Orchestration logs created: 2026-04-26T02:34:12Z-wash.md, 2026-04-26T02:34:12Z-zoe.md.
+- Session log created: 2026-04-26T02:34:12Z-temperature-feedback-approved.md.

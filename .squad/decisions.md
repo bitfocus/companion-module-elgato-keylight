@@ -56,3 +56,34 @@ Advanced Key Light feedbacks now only match against fresh polled light status, a
 - Repo-wide `yarn lint` blocked by unrelated workspace files (not a blocker)
 
 **Residual Note:** Delta/toggle actions still depend on read-then-write pattern, but this is not a release blocker.
+
+### Wash Decision: Normalize and Migrate Temperature Feedback Values
+
+Color temperature feedbacks should compare and store rounded Kelvin values, even though the Elgato API still reports raw mired temperatures.
+
+**Why:**
+
+- Operators see rounded Kelvin values in variables and feedback dropdown labels.
+- Older saved feedbacks may still carry raw mired IDs, which can leave the UI selection out of sync with the live value comparison.
+
+**Implementation:**
+
+- Centralize temperature normalization in `src/utils.ts` so variables and feedback matching share the same Kelvin rounding rules.
+- Keep runtime feedback matching backward-compatible by accepting Kelvin, mired, or `5600K`-style saved values.
+- Add a feedback upgrade in `src/upgrades.ts` to rewrite saved `temperature` feedback options from legacy mired/raw values to Kelvin dropdown IDs.
+
+### Zoe Decision: Approve Wash's temperature normalization revision
+
+**Verdict:** Approve Wash's revision for the Kelvin-vs-mired feedback bug.
+
+**Why:**
+
+- `src/feedbacks.ts` compares temperature feedbacks in rounded Kelvin, matching the variable/UI value users see.
+- `src/utils.ts` normalizes both legacy mired IDs and Kelvin-formatted selections to the same comparison value.
+- `src/upgrades.ts` migrates older saved temperature feedback values forward to Kelvin IDs.
+
+**Validation:**
+
+- `yarn build` ✅
+- `yarn lint:raw src/feedbacks.ts src/variables.ts src/utils.ts src/main.ts src/polling.ts src/upgrades.ts src/actions.ts` ✅
+- `yarn lint` ⚠️ blocked by unrelated `.squad-archive-*` files, not by this revision
