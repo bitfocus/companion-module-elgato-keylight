@@ -25,6 +25,12 @@
 - The advanced feedbacks currently return only `color`/`bgcolor`; text changes are not implemented in the callback even though Companion advanced feedbacks can style text.
 - Key review paths for this module’s feedback behavior are `src/feedbacks.ts`, `src/polling.ts`, `src/main.ts`, and `src/variables.ts`.
 
+### 2026-04-26: Temperature feedback unit mismatch review
+
+- `src/variables.ts` exposes light temperature as rounded Kelvin text via `getKelvin(...)`, but `src/feedbacks.ts` still compares the selected feedback option against raw `lightStatus.temperature` mired values.
+- `src/main.ts` builds temperature feedback dropdown labels in Kelvin while storing option IDs as `getMired(kelvin)`, so a displayed `5600K` selection resolves to `179` mired and can miss a live device value like `178` mired even though the variable still shows `5600K`.
+- Reviewer verdict for this revision: build passes, repo-wide `yarn lint` is polluted by unrelated `.squad-archive` files, and targeted lint for `src/feedbacks.ts src/variables.ts src/utils.ts src/main.ts src/polling.ts` passes.
+
 ### 2026-04-25: Merge validation — origin/main → feature/preset-architecture
 
 **Review scope:** Post-merge quality validation for 6 upstream commits
@@ -80,3 +86,21 @@
 - **Build & Lint:** ✅ passed
 - **All regression checks passed**
 - **Ready for production integration**
+
+### Cycle Complete — 2026-04-26T02:28:20Z
+
+**Zoe Status:** ✅ Review complete. Approved Wash's revision.
+
+**Key Findings on Initial Rejection:**
+
+- `src/variables.ts` shows rounded Kelvin (`5600K`) but `src/feedbacks.ts` compares raw mired values
+- User-visible `5600K` maps to `179` mired, fails on device `178` mired even though variable still shows `5600K`
+
+**Key Approvals on Wash Revision:**
+
+- Feedbacks read live light state directly from `lights[0]`
+- Refresh integrated on polling and action updates
+- Advanced text override support added
+- Stale/offline state clearing validated
+
+**Orchestration Log Created:** 2026-04-26T02-28-20Z-zoe.md

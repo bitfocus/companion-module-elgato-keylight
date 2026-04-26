@@ -1,30 +1,30 @@
 ## 2026-04-26: Feedback Behavior Fixes
 
-### Kaylee Decision: Refresh Feedbacks from Live Light State
+### Kaylee Decision: Match Temperature Feedback in Kelvin
 
-The module's feedback callbacks should read directly from `self.data.keylight.options.lights[0]` and not depend on the unused `self.data.variables` metadata object.
+Color temperature feedback should compare the same operator-facing Kelvin value that variables display, not the raw mired value from the Elgato API.
 
-Whenever module state is pushed through `UpdateVariables`, we should also call `self.checkFeedbacks()` so polled changes and action responses immediately restyle Companion buttons.
+**Why:**
 
-### Zoe Decision: Feedback Regression Review — Current State Rejected
+- Operators configure the feedback as "Temperature in Kelvin".
+- `$(keylight:options.light.lightTemperature)` already shows rounded Kelvin via `getKelvin(...)`.
+- Some device mired readings round to the displayed Kelvin value without being numerically identical to the feedback choice's raw mired ID, so comparing raw mired values can miss a visible `5600K` match.
 
-**Scope:** Review of current Elgato Key Light feedback implementation.
+**Implementation:**
 
-**Decision:** Reject the current feedback state as shippable.
+- Temperature feedback choices now store Kelvin IDs to match the UI label.
+- The feedback callback normalizes live light temperature with `getKelvin(...)`.
+- Legacy saved feedbacks that still store mired IDs are normalized before comparison so existing buttons keep working.
 
-**Issues Identified:**
+### Zoe Decision: Reject temperature feedback revision on unit mismatch
 
-- `src/feedbacks.ts` depends on `self.data.variables`, but the map is never populated in the current source.
-- `src/polling.ts` never calls `checkFeedbacks(...)`, so polled state changes will not trigger feedback re-evaluation.
-- The current advanced feedback result does not implement text overrides, so "change text" expectations are unsupported.
+**Verdict:** Reject the current revision for the reported color-temperature feedback bug.
 
-**Required Revision Owner:** Wash (not Kaylee).
+**Why:** The comparison path still mismatches display units and stored units. `src/variables.ts` shows rounded Kelvin text (`5600K`), but `src/feedbacks.ts` compares against the raw mired reading from `lightStatus.temperature`. The dropdown in `src/main.ts` labels the choice as Kelvin while storing `getMired(kelvin)` as the option ID, so a user-visible `5600K` selection maps to `179` mired and fails when the lamp reports `178` mired even though the variable still rounds to `5600K`.
 
-**Regression Checks Required on Next Fix:**
+**Next revision owner:** Wash (not Kaylee).
 
-- Power feedback updates style when the lamp changes on/off through polling.
-- Brightness and temperature feedbacks still evaluate correctly.
-- Offline/error polling transitions do not leave stale active feedback state behind.
+**Regression expectation:** Temperature feedback must compare in the same unit and rounding domain the operator sees in Companion, or the variable/feedback pair will keep disagreeing.
 
 ### Wash Decision: Fresh Feedback State with Safe Stale Clearing
 

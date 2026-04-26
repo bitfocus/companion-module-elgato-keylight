@@ -19,6 +19,7 @@ Use this when a Companion module defines feedbacks from device state that is ref
 - Verify the feedback callback reads from a state source that is actually populated at runtime.
 - Verify the code path that mutates state also calls `checkFeedbacks(...)` or `checkFeedbacksById(...)` so Companion re-runs the feedback.
 - For advanced feedbacks, confirm the callback returns every style field the user expects to change (`text`, `color`, `bgcolor`, etc.).
+- Compare in the same unit and rounding domain the operator sees in the UI; if variables display rounded Kelvin but feedbacks compare raw mired values, visible matches will still fail.
 - Validate failure paths too: offline/default state should clear or correctly restyle the feedback instead of leaving stale state behind.
 
 ## Examples
@@ -30,4 +31,5 @@ Use this when a Companion module defines feedbacks from device state that is ref
 
 - Assuming updated polled state automatically refreshes Companion feedbacks.
 - Comparing against a lookup table that is never initialized.
+- Mixing display labels and stored comparison units, especially Kelvin labels backed by raw mired IDs.
 - Claiming text-changing feedback support when the advanced feedback result never returns `text`.
