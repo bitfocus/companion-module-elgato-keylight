@@ -1,6 +1,6 @@
 import { ModuleInstance } from './main.js'
 import { CompanionVariableDefinition, CompanionVariableValues } from '@companion-module/base'
-import { getKelvin } from './utils.js'
+import { formatTemperatureValue } from './utils.js'
 
 export enum VariableId {
 	lightIp = 'light.ip',
@@ -143,6 +143,7 @@ export function UpdateVariableDefinitions(self: ModuleInstance): void {
 
 export function UpdateVariables(self: ModuleInstance): void {
 	const variables: CompanionVariableValues = {}
+	const lightStateUnavailable = '$NA. Light State Unavailable'
 	if (!self.config.polling) {
 		self.log('debug', `Polling set to ${self.config.polling}`)
 		// Set all variables to NA when polling is turned off
@@ -186,7 +187,7 @@ export function UpdateVariables(self: ModuleInstance): void {
 			? `${keylight.settings.powerOnBrightness}%`
 			: '0%'
 		variables[VariableId.settingsPowerOnTemperature] = keylight.settings?.powerOnTemperature
-			? `${getKelvin(keylight.settings.powerOnTemperature)}K`
+			? formatTemperatureValue(keylight.settings.powerOnTemperature)
 			: '0K'
 		variables[VariableId.settingsSwitchOnDurationMs] = keylight.settings?.switchOnDurationMs
 			? keylight.settings.switchOnDurationMs / 1000
@@ -217,21 +218,23 @@ export function UpdateVariables(self: ModuleInstance): void {
 		variables[VariableId.infoWifiRssi] = keylight.info?.['wifi-info']?.rssi || 0
 
 		// Options/Light Status properties
-		variables[VariableId.optionsNumberOfLights] = keylight.options?.numberOfLights || 0
-
-		const lightStatus = keylight.options?.lights?.[0]
+		const lightStatus = self.getLightStatus()
 		if (lightStatus) {
+			variables[VariableId.optionsNumberOfLights] =
+				keylight.options?.numberOfLights ?? keylight.options?.lights?.length ?? 0
 			variables[VariableId.optionsLightOn] = lightStatus.on === 1 ? 'On' : 'Off'
 			variables[VariableId.optionsLightBrightness] = lightStatus.brightness ? `${lightStatus.brightness}%` : '0%'
 			variables[VariableId.optionsLightTemperature] = lightStatus.temperature
-				? `${getKelvin(lightStatus.temperature)}K`
+				? formatTemperatureValue(lightStatus.temperature)
 				: '0K'
 		} else {
-			variables[VariableId.optionsLightOn] = 'Off'
-			variables[VariableId.optionsLightBrightness] = '0%'
-			variables[VariableId.optionsLightTemperature] = '0K'
+			variables[VariableId.optionsNumberOfLights] = lightStateUnavailable
+			variables[VariableId.optionsLightOn] = lightStateUnavailable
+			variables[VariableId.optionsLightBrightness] = lightStateUnavailable
+			variables[VariableId.optionsLightTemperature] = lightStateUnavailable
 		}
 	}
 
 	self.setVariableValues(variables)
+	self.checkFeedbacks()
 }

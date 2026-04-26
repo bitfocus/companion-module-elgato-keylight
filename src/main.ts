@@ -6,10 +6,10 @@ import { type ModuleConfig } from './utils.js'
 import { UpdateFeedbacks } from './feedbacks.js'
 import { GetUrl, InitPolling } from './polling.js'
 import { UpgradeScripts } from './upgrades.js'
-import { getMired, VariableMap } from './utils.js'
+import { getMired } from './utils.js'
 import { UpdateVariableDefinitions, UpdateVariables } from './variables.js'
 import { ElgatoKeylightApi } from './api/ElgatoKeyLightApi.js'
-import { KeyLight } from './api/types/KeyLight.js'
+import { KeyLight, KeyLightStatus } from './api/types/KeyLight.js'
 
 export class ModuleInstance extends InstanceBase<ModuleConfig> {
 	config!: ModuleConfig
@@ -18,7 +18,10 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 	data: {
 		keylight: KeyLight
 		interval: SetIntervalAsyncTimer<[]> | null
-		variables: VariableMap
+		lightStatus: {
+			isValid: boolean
+			lastUpdatedAt: number | null
+		}
 	}
 
 	INTERVAL_MIN = 250
@@ -83,7 +86,10 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 				},
 			},
 			interval: null,
-			variables: {},
+			lightStatus: {
+				isValid: false,
+				lastUpdatedAt: null,
+			},
 		}
 
 		this.KELVIN_LIST = Array.from(Array((this.KELVIN_MAX - this.KELVIN_MIN) / this.KELVIN_STEP + 1).keys()).map(
@@ -147,6 +153,33 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 
 	updateVariables(): void {
 		UpdateVariables(this)
+	}
+
+	markLightStatusUpdated(): void {
+		this.data.lightStatus.isValid = true
+		this.data.lightStatus.lastUpdatedAt = Date.now()
+	}
+
+	invalidateLightStatus(): void {
+		this.data.lightStatus.isValid = false
+		this.data.lightStatus.lastUpdatedAt = null
+	}
+
+	isLightStatusFresh(): boolean {
+		if (!this.config?.polling || !this.data.lightStatus.isValid || this.data.lightStatus.lastUpdatedAt === null) {
+			return false
+		}
+
+		const staleAfterMs = Math.max(this.config.interval * 3, 2000)
+		return Date.now() - this.data.lightStatus.lastUpdatedAt <= staleAfterMs
+	}
+
+	getLightStatus(): KeyLightStatus | undefined {
+		if (!this.isLightStatusFresh()) {
+			return undefined
+		}
+
+		return this.data.keylight.options?.lights?.[0]
 	}
 
 	getUrl(): string {

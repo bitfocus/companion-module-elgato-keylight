@@ -22,6 +22,11 @@ export async function InitPolling(self: ModuleInstance): Promise<void> {
 			try {
 				const lights: KeyLightOptions = await self.keyLightApi.getLights()
 				self.data.keylight.options = lights
+				if (lights.lights[0]) {
+					self.markLightStatusUpdated()
+				} else {
+					self.invalidateLightStatus()
+				}
 				successCount++
 			} catch (error) {
 				const errorMessage =
@@ -38,6 +43,7 @@ export async function InitPolling(self: ModuleInstance): Promise<void> {
 						},
 					],
 				}
+				self.invalidateLightStatus()
 			}
 
 			// Get Accessory Info
@@ -92,15 +98,18 @@ export async function InitPolling(self: ModuleInstance): Promise<void> {
 			self.updateVariables()
 
 			// Update status based on success
-			if (successCount > 0) {
+			if (self.isLightStatusFresh()) {
 				self.updateStatus(InstanceStatus.Ok)
+			} else if (successCount > 0) {
+				self.updateStatus(InstanceStatus.UnknownWarning, 'Light state unavailable')
 			} else {
-				self.updateStatus(InstanceStatus.UnknownError)
+				self.updateStatus(InstanceStatus.ConnectionFailure, 'Unable to reach Key Light')
 			}
 		}, self.config.interval)
 
 		return
 	}
 
+	self.invalidateLightStatus()
 	self.updateVariables()
 }
